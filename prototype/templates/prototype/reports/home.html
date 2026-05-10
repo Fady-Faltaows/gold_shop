@@ -1,0 +1,38 @@
+{% extends 'prototype/base.html' %}
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">📊 Reports</h2>
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card h-100 border-warning">
+            <div class="card-body text-center">
+                <h1>🧾</h1>
+                <h5>Sales Report</h5>
+                <p class="text-muted">View all sales filtered by date</p>
+                <a href="{% url 'report_sales' %}" class="btn btn-warning">View Report</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-warning">
+            <div class="card-body text-center">
+                <h1>📦</h1>
+                <h5>Inventory Report</h5>
+                <p class="text-muted">Stock levels and alerts</p>
+                <a href="{% url 'report_inventory' %}" class="btn btn-warning">View Report</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-warning">
+            <div class="card-body text-center">
+                <h1>💰</h1>
+                <h5>Profit Report</h5>
+                <p class="text-muted">Profit breakdown over time</p>
+                <a href="{% url 'report_profit' %}" class="btn btn-warning">View Report</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

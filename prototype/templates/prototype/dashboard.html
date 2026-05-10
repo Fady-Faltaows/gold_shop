@@ -1,0 +1,52 @@
+{% extends 'prototype/base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card border-warning">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Gold Price / gram</h6>
+                <h3 class="text-warning">
+                    {{ latest_gold.price_per_gram|default:"Not set" }}
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Total Products</h6>
+                <h3>{{ total_products }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Total Sales</h6>
+                <h3>{{ total_sales }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Total Profit</h6>
+                <h3 class="text-success">{{ total_profit }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if low_stock %}
+<div class="alert alert-warning">
+    <strong>⚠️ Low Stock Alert:</strong>
+    {% for item in low_stock %}
+        {{ item.product.name }} ({{ item.quantity_pieces }} left){% if not forloop.last %}, {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

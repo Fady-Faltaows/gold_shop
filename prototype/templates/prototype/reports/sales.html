@@ -1,0 +1,76 @@
+{% extends 'prototype/base.html' %}
+{% block title %}Sales Report{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">🧾 Sales Report</h2>
+
+<form method="get" class="card p-3 mb-4 bg-light">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">From</label>
+            <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">To</label>
+            <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-warning w-100">Filter</button>
+        </div>
+    </div>
+</form>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card text-center border-warning">
+            <div class="card-body">
+                <h6 class="text-muted">Total Sales</h6>
+                <h3>{{ total_count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Total Revenue</h6>
+                <h3>{{ total_revenue }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <h6 class="text-muted">Total Profit</h6>
+                <h3 class="text-success">{{ total_profit }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-hover">
+    <thead class="table-warning">
+        <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Gold Price</th>
+            <th>Total</th>
+            <th>Profit</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sale in sales %}
+        <tr>
+            <td>{{ sale.id }}</td>
+            <td>{{ sale.customer_name|default:"—" }}</td>
+            <td>{{ sale.gold_price_at_sale }}</td>
+            <td class="fw-bold">{{ sale.get_total }}</td>
+            <td class="text-success">{{ sale.get_total_profit }}</td>
+            <td>{{ sale.created_at|date:"Y-m-d H:i" }}</td>
+        </tr>
+        {% empty %}
+            <tr><td colspan="6" class="text-center text-muted">No sales found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

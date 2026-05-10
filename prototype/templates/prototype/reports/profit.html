@@ -1,0 +1,60 @@
+{% extends 'prototype/base.html' %}
+{% block title %}Profit Report{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">💰 Profit Report</h2>
+
+<form method="get" class="card p-3 mb-4 bg-light">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">From</label>
+            <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">To</label>
+            <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-warning w-100">Filter</button>
+        </div>
+    </div>
+</form>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Total Revenue</h6>
+                <h3>{{ total_revenue }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <h6 class="text-muted">Total Profit</h6>
+                <h3 class="text-success">{{ total_profit }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-hover">
+    <thead class="table-warning">
+        <tr>
+            <th>Date</th>
+            <th>Daily Profit</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for day, profit in profit_by_day.items %}
+        <tr>
+            <td>{{ day }}</td>
+            <td class="text-success fw-bold">{{ profit }}</td>
+        </tr>
+        {% empty %}
+            <tr><td colspan="2" class="text-center text-muted">No data found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

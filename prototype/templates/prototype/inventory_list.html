@@ -1,0 +1,38 @@
+{% extends 'prototype/base.html' %}
+{% block title %}Inventory{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Inventory</h2>
+<table class="table table-hover">
+    <thead class="table-warning">
+        <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Karat</th>
+            <th>Weight (g)</th>
+            <th>In Stock</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in inventory %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.product.category }}</td>
+            <td>{{ item.product.karat }}K</td>
+            <td>{{ item.product.weight_grams }}</td>
+            <td>{{ item.quantity_pieces }}</td>
+            <td>
+                {% if item.quantity_pieces == 0 %}
+                    <span class="badge bg-danger">Out of Stock</span>
+                {% elif item.quantity_pieces <= 3 %}
+                    <span class="badge bg-warning text-dark">Low Stock</span>
+                {% else %}
+                    <span class="badge bg-success">In Stock</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -226,3 +226,26 @@ def report_profit(request):
         'date_to': date_to or '',
     }
     return render(request, 'prototype/reports/profit.html', context)
+
+def report_gold_price(request):
+    gold_prices = GoldPrice.objects.order_by('-updated_at')
+    latest_gold = gold_prices.first()
+
+    highest = gold_prices.order_by('-price_per_gram').first()
+    lowest  = gold_prices.order_by('price_per_gram').first()
+
+    chart_labels = []
+    chart_values = []
+    for gp in reversed(list(gold_prices[:30])):
+        chart_labels.append(gp.updated_at.strftime('%Y-%m-%d %H:%M'))
+        chart_values.append(float(gp.price_per_gram))
+
+    context = {
+        'gold_prices': gold_prices,
+        'latest_gold': latest_gold,
+        'highest': highest,
+        'lowest': lowest,
+        'chart_labels': chart_labels,
+        'chart_values': chart_values,
+    }
+    return render(request, 'prototype/reports/gold_price.html', context)

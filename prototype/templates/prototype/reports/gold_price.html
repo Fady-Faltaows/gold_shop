@@ -1,0 +1,167 @@
+{% extends 'prototype/base.html' %}
+{% block title %}Gold Price Report{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>📈 Gold Price Dashboard</h2>
+    <a href="{% url 'reports_home' %}" class="btn btn-secondary">← Back to Reports</a>
+</div>
+
+{# Summary Cards #}
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-warning text-center h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Current Price / gram</h6>
+                <h2 class="text-warning fw-bold">
+                    {{ latest_gold.price_per_gram|default:"Not set" }}
+                </h2>
+                <small class="text-muted">
+                    {% if latest_gold %}
+                        Updated: {{ latest_gold.updated_at|date:"Y-m-d H:i" }}
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100 border-danger">
+            <div class="card-body">
+                <h6 class="text-muted">Highest Price</h6>
+                <h2 class="text-danger fw-bold">
+                    {{ highest.price_per_gram|default:"—" }}
+                </h2>
+                <small class="text-muted">
+                    {{ highest.updated_at|date:"Y-m-d"|default:"" }}
+                </small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100 border-success">
+            <div class="card-body">
+                <h6 class="text-muted">Lowest Price</h6>
+                <h2 class="text-success fw-bold">
+                    {{ lowest.price_per_gram|default:"—" }}
+                </h2>
+                <small class="text-muted">
+                    {{ lowest.updated_at|date:"Y-m-d"|default:"" }}
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Chart #}
+{% if chart_labels %}
+<div class="card mb-4">
+    <div class="card-header bg-warning text-dark fw-bold">
+        📊 Price History (Last 30 Records)
+    </div>
+    <div class="card-body">
+        <canvas id="goldChart" height="100"></canvas>
+    </div>
+</div>
+{% endif %}
+
+{# History Table #}
+<div class="card">
+    <div class="card-header bg-warning text-dark fw-bold">
+        🕐 Price History Log
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Price per gram</th>
+                    <th>Date & Time</th>
+                    <th>Change</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gp in gold_prices %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="fw-bold text-warning">{{ gp.price_per_gram }}</td>
+                    <td>{{ gp.updated_at|date:"Y-m-d H:i" }}</td>
+                    <td>
+                        {% if not forloop.last %}
+                            {% with next=gold_prices|slice:forloop.counter %}
+                                {% for n in next|slice:":1" %}
+                                    {% if gp.price_per_gram > n.price_per_gram %}
+                                        <span class="text-success">▲ Up</span>
+                                    {% elif gp.price_per_gram < n.price_per_gram %}
+                                        <span class="text-danger">▼ Down</span>
+                                    {% else %}
+                                        <span class="text-muted">— Same</span>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Latest</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-3">
+                        No gold price records yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{# Chart JS #}
+{% if chart_labels %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('goldChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Gold Price per gram',
+                data: {{ chart_values|safe }},
+                borderColor: '#ffc107',
+                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                borderWidth: 2,
+                pointBackgroundColor: '#ffc107',
+                pointRadius: 4,
+                tension: 0.3,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `Price: ${ctx.parsed.y}`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    ticks: {
+                        callback: value => value
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

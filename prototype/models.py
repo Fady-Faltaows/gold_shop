@@ -1,18 +1,20 @@
 from django.db import models
 
+
 class GoldPrice(models.Model):
     price_per_gram = models.DecimalField(max_digits=10, decimal_places=2)
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at     = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Gold Price: {self.price_per_gram} @ {self.updated_at.strftime('%Y-%m-%d %H:%M')}"
 
     class Meta:
-        verbose_name = "Gold Price"
+        verbose_name        = "Gold Price"
         verbose_name_plural = "Gold Prices"
 
+
 class Category(models.Model):
-    name = models.CharField(max_length=100)
+    name        = models.CharField(max_length=100)
     description = models.TextField(blank=True)
 
     def __str__(self):
@@ -20,6 +22,7 @@ class Category(models.Model):
 
     class Meta:
         verbose_name_plural = "Categories"
+
 
 class Product(models.Model):
     KARAT_CHOICES = [
@@ -29,13 +32,13 @@ class Product(models.Model):
         (24, '24K'),
     ]
 
-    name = models.CharField(max_length=200)
-    category = models.ForeignKey(Category, on_delete=models.PROTECT)
-    karat = models.IntegerField(choices=KARAT_CHOICES, default=21)
-    weight_grams = models.DecimalField(max_digits=8, decimal_places=3)
-    workmanship_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    name             = models.CharField(max_length=200)
+    category         = models.ForeignKey(Category, on_delete=models.PROTECT)
+    karat            = models.IntegerField(choices=KARAT_CHOICES, default=21)
+    weight_grams     = models.DecimalField(max_digits=8, decimal_places=3)
+    workmanship_fee  = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    notes            = models.TextField(blank=True)
+    created_at       = models.DateTimeField(auto_now_add=True)
 
     def get_selling_price(self):
         latest = GoldPrice.objects.order_by('-updated_at').first()
@@ -46,8 +49,9 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.name} ({self.karat}K - {self.weight_grams}g)"
 
+
 class Inventory(models.Model):
-    product = models.OneToOneField(Product, on_delete=models.CASCADE)
+    product         = models.OneToOneField(Product, on_delete=models.CASCADE)
     quantity_pieces = models.PositiveIntegerField(default=0)
 
     def __str__(self):
@@ -56,11 +60,12 @@ class Inventory(models.Model):
     class Meta:
         verbose_name_plural = "Inventory"
 
+
 class Sale(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    customer_name = models.CharField(max_length=200, blank=True)
-    notes = models.TextField(blank=True)
-    gold_price_at_sale = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at          = models.DateTimeField(auto_now_add=True)
+    customer_name       = models.CharField(max_length=200, blank=True)
+    notes               = models.TextField(blank=True)
+    gold_price_at_sale  = models.DecimalField(max_digits=10, decimal_places=2)
 
     def get_total(self):
         return sum(item.get_subtotal() for item in self.items.all()) or 0
@@ -68,36 +73,23 @@ class Sale(models.Model):
     def get_total_profit(self):
         return sum(item.get_profit() for item in self.items.all()) or 0
 
-    def __str__(self):
-        return f"Sale #{self.id} — {self.created_at.strftime('%Y-%m-%d')}"
-
-    def save(self, *args, **kwargs):          # ← belongs to Sale
+    def save(self, *args, **kwargs):
         if not self.gold_price_at_sale:
             latest_gold = GoldPrice.objects.order_by('-updated_at').first()
             if latest_gold:
                 self.gold_price_at_sale = latest_gold.price_per_gram
         super().save(*args, **kwargs)
 
-class Purchase(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    quantity_purchased = models.PositiveIntegerField()
-    cost_per_piece = models.DecimalField(max_digits=10, decimal_places=2)
-    supplier_name = models.CharField(max_length=200, blank=True)
-    notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def get_total_cost(self):
-        return self.cost_per_piece * self.quantity_purchased
-
     def __str__(self):
-        return f"Purchase: {self.product.name} x{self.quantity_purchased} on {self.created_at.strftime('%Y-%m-%d')}"
+        return f"Sale #{self.id} — {self.created_at.strftime('%Y-%m-%d')}"
+
 
 class SaleItem(models.Model):
-    sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    quantity = models.PositiveIntegerField(default=1)
+    sale            = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='items')
+    product         = models.ForeignKey(Product, on_delete=models.PROTECT)
+    quantity        = models.PositiveIntegerField(default=1)
     price_per_piece = models.DecimalField(max_digits=10, decimal_places=2)
-    cost_per_piece = models.DecimalField(max_digits=10, decimal_places=2)
+    cost_per_piece  = models.DecimalField(max_digits=10, decimal_places=2)
 
     def get_subtotal(self):
         if self.price_per_piece is None or self.quantity is None:
@@ -109,14 +101,29 @@ class SaleItem(models.Model):
             return 0
         return (self.price_per_piece - self.cost_per_piece) * self.quantity
 
-    def __str__(self):
-        return f"{self.product.name} x{self.quantity}"
-    
-    def save(self, *args, **kwargs):          # ← belongs to SaleItem
+    def save(self, *args, **kwargs):
         if self.product:
             latest_gold = GoldPrice.objects.order_by('-updated_at').first()
             if latest_gold:
-                gold_price = latest_gold.price_per_gram
-                self.cost_per_piece = gold_price * self.product.weight_grams
+                gold_price         = latest_gold.price_per_gram
+                self.cost_per_piece  = gold_price * self.product.weight_grams
                 self.price_per_piece = self.cost_per_piece + self.product.workmanship_fee
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.product.name} x{self.quantity}"
+
+
+class Purchase(models.Model):
+    product             = models.ForeignKey(Product, on_delete=models.PROTECT)
+    quantity_purchased  = models.PositiveIntegerField()
+    cost_per_piece      = models.DecimalField(max_digits=10, decimal_places=2)
+    supplier_name       = models.CharField(max_length=200, blank=True)
+    notes               = models.TextField(blank=True)
+    created_at          = models.DateTimeField(auto_now_add=True)
+
+    def get_total_cost(self):
+        return self.cost_per_piece * self.quantity_purchased
+
+    def __str__(self):
+        return f"Purchase: {self.product.name} x{self.quantity_purchased} on {self.created_at.strftime('%Y-%m-%d')}"

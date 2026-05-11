@@ -31,9 +31,7 @@
     </div>
 
     <div class="card mb-4">
-        <div class="card-header bg-warning text-dark fw-bold">
-            Sale Items
-        </div>
+        <div class="card-header bg-warning text-dark fw-bold">Sale Items</div>
         <div class="card-body">
             <table class="table" id="items-table">
                 <thead>
@@ -44,6 +42,7 @@
                         <th>Workmanship</th>
                         <th>Unit Price</th>
                         <th>Qty</th>
+                        <th>In Stock</th>
                         <th>Subtotal</th>
                         <th></th>
                     </tr>
@@ -57,7 +56,8 @@
                                 <option value="{{ p.id }}"
                                     data-weight="{{ p.weight_grams }}"
                                     data-karat="{{ p.karat }}"
-                                    data-workmanship="{{ p.workmanship_fee }}">
+                                    data-workmanship="{{ p.workmanship_fee }}"
+                                    data-stock="{{ p.inventory.quantity_pieces|default:0 }}">
                                     {{ p.name }} ({{ p.karat }}K)
                                 </option>
                                 {% endfor %}
@@ -67,19 +67,28 @@
                         <td><span class="karat-display">—</span></td>
                         <td><span class="work-display">—</span></td>
                         <td><span class="price-display fw-bold text-success">—</span></td>
-                        <td><input type="number" name="quantity" class="form-control qty-input" value="1" min="1" style="width:80px"></td>
+                        <td>
+                            <input type="number" name="quantity"
+                                class="form-control qty-input"
+                                value="1" min="1" style="width:80px">
+                        </td>
+                        <td><span class="stock-display">—</span></td>
                         <td><span class="subtotal-display fw-bold">—</span></td>
-                        <td><button type="button" class="btn btn-sm btn-danger remove-row">✕</button></td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-danger remove-row">✕</button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
-            <button type="button" class="btn btn-outline-warning" id="add-row">+ Add Item</button>
+            <button type="button" class="btn btn-outline-warning" id="add-row">
+                + Add Item
+            </button>
         </div>
     </div>
 
     <div class="card mb-4">
         <div class="card-body text-end">
-            <h5>Grand Total: <span id="grand-total" class="text-success fw-bold">0</span></h5>
+            <h5>Grand Total: <span id="grand-total" class="text-success fw-bold">0.00</span></h5>
         </div>
     </div>
 
@@ -90,31 +99,49 @@
 </form>
 
 <script>
-const goldPrice = parseFloat("{{ latest_gold.price_per_gram|default:'0' }}") || 0;
+const goldPrice = {{ gold_price_js }};
 
 function calculateRow(row) {
     const select = row.querySelector('.product-select');
     const option = select.options[select.selectedIndex];
-    const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+    const qty    = parseFloat(row.querySelector('.qty-input').value) || 0;
 
-    if (option.value) {
-        const weight = parseFloat(option.dataset.weight) || 0;
+    if (option && option.value) {
+        const weight      = parseFloat(option.dataset.weight)      || 0;
         const workmanship = parseFloat(option.dataset.workmanship) || 0;
-        const unitPrice = (goldPrice * weight) + workmanship;
-        const subtotal = unitPrice * qty;
+        const karat       = option.dataset.karat                   || '—';
+        const stock       = parseInt(option.dataset.stock)         || 0;
+        const unitPrice   = (goldPrice * weight) + workmanship;
+        const subtotal    = unitPrice * qty;
 
-        row.querySelector('.weight-display').textContent = weight.toFixed(3);
-        row.querySelector('.karat-display').textContent = option.dataset.karat + 'K';
-        row.querySelector('.work-display').textContent = workmanship.toFixed(2);
-        row.querySelector('.price-display').textContent = unitPrice.toFixed(2);
+        row.querySelector('.weight-display').textContent   = weight.toFixed(3);
+        row.querySelector('.karat-display').textContent    = karat + 'K';
+        row.querySelector('.work-display').textContent     = workmanship.toFixed(2);
+        row.querySelector('.price-display').textContent    = unitPrice.toFixed(2);
         row.querySelector('.subtotal-display').textContent = subtotal.toFixed(2);
+        row.querySelector('.stock-display').textContent    = stock;
+
+        // stock warning — turn row red if over stock
+        const qtyInput = row.querySelector('.qty-input');
+        if (qty > stock) {
+            qtyInput.classList.add('is-invalid');
+            qtyInput.max = stock;
+        } else {
+            qtyInput.classList.remove('is-invalid');
+            qtyInput.max = stock;
+        }
+
     } else {
-        row.querySelector('.weight-display').textContent = '—';
-        row.querySelector('.karat-display').textContent = '—';
-        row.querySelector('.work-display').textContent = '—';
-        row.querySelector('.price-display').textContent = '—';
+        row.querySelector('.weight-display').textContent   = '—';
+        row.querySelector('.karat-display').textContent    = '—';
+        row.querySelector('.work-display').textContent     = '—';
+        row.querySelector('.price-display').textContent    = '—';
         row.querySelector('.subtotal-display').textContent = '—';
+        row.querySelector('.stock-display').textContent    = '—';
+        row.querySelector('.qty-input').classList.remove('is-invalid');
+        row.querySelector('.qty-input').removeAttribute('max');
     }
+
     updateGrandTotal();
 }
 
@@ -129,7 +156,7 @@ function updateGrandTotal() {
 
 function attachRowEvents(row) {
     row.querySelector('.product-select').addEventListener('change', () => calculateRow(row));
-    row.querySelector('.qty-input').addEventListener('input', () => calculateRow(row));
+    row.querySelector('.qty-input').addEventListener('input',  () => calculateRow(row));
     row.querySelector('.remove-row').addEventListener('click', () => {
         if (document.querySelectorAll('.item-row').length > 1) {
             row.remove();
@@ -138,51 +165,49 @@ function attachRowEvents(row) {
     });
 }
 
-// attach events to first row
+// prevent form submit if any row has invalid quantity
+document.querySelector('form').addEventListener('submit', function(e) {
+    let hasError = false;
+    document.querySelectorAll('.item-row').forEach(row => {
+        const select = row.querySelector('.product-select');
+        const option = select.options[select.selectedIndex];
+        const qty    = parseInt(row.querySelector('.qty-input').value) || 0;
+        const stock  = parseInt(option?.dataset.stock) || 0;
+
+        if (option && option.value && qty > stock) {
+            hasError = true;
+            row.querySelector('.qty-input').classList.add('is-invalid');
+        }
+    });
+
+    if (hasError) {
+        e.preventDefault();
+        alert('⚠️ One or more items exceed available stock. Please fix before saving.');
+    }
+});
+
+// init first row
 attachRowEvents(document.querySelector('.item-row'));
 
 // add new row
 document.getElementById('add-row').addEventListener('click', () => {
-    const tbody = document.getElementById('items-body');
+    const tbody    = document.getElementById('items-body');
     const firstRow = document.querySelector('.item-row');
-    const newRow = firstRow.cloneNode(true);
+    const newRow   = firstRow.cloneNode(true);
 
-    // reset cloned row values
-    newRow.querySelector('.product-select').selectedIndex = 0;
-    newRow.querySelector('.qty-input').value = 1;
-    newRow.querySelector('.weight-display').textContent = '—';
-    newRow.querySelector('.karat-display').textContent = '—';
-    newRow.querySelector('.work-display').textContent = '—';
-    newRow.querySelector('.price-display').textContent = '—';
-    newRow.querySelector('.subtotal-display').textContent = '—';
+    newRow.querySelector('.product-select').selectedIndex  = 0;
+    newRow.querySelector('.qty-input').value               = 1;
+    newRow.querySelector('.qty-input').removeAttribute('max');
+    newRow.querySelector('.qty-input').classList.remove('is-invalid');
+    newRow.querySelector('.weight-display').textContent    = '—';
+    newRow.querySelector('.karat-display').textContent     = '—';
+    newRow.querySelector('.work-display').textContent      = '—';
+    newRow.querySelector('.price-display').textContent     = '—';
+    newRow.querySelector('.subtotal-display').textContent  = '—';
+    newRow.querySelector('.stock-display').textContent     = '—';
 
     tbody.appendChild(newRow);
     attachRowEvents(newRow);
 });
-function initTomSelect(row) {
-    const select = row.querySelector('.product-select');
-    // destroy existing instance if any (important for cloned rows)
-    if (select.tomselect) {
-        select.tomselect.destroy();
-    }
-    new TomSelect(select, {
-        placeholder: '— Search Product —',
-        allowEmptyOption: true,
-        onChange: function() {
-            calculateRow(row);
-        }
-    });
-}
-
-function attachRowEvents(row) {
-    initTomSelect(row);  // ← replaces the old change event listener
-    row.querySelector('.qty-input').addEventListener('input', () => calculateRow(row));
-    row.querySelector('.remove-row').addEventListener('click', () => {
-        if (document.querySelectorAll('.item-row').length > 1) {
-            row.remove();
-            updateGrandTotal();
-        }
-    });
-}
 </script>
 {% endblock %}

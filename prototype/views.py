@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import GoldPrice, Product, Inventory, Sale, SaleItem
-from .forms import SaleForm, SaleItemForm
+from .models import GoldPrice, Product, Inventory, Sale, SaleItem, Purchase
+from .forms import SaleForm, SaleItemForm, PurchaseForm, GoldPriceForm
 from django.db.models import Sum, Count
 from django.utils import timezone
 from datetime import timedelta
@@ -13,12 +13,22 @@ def dashboard(request):
     total_profit = sum(sale.get_total_profit() for sale in Sale.objects.all())
     low_stock = Inventory.objects.filter(quantity_pieces__lte=3)
 
+    if request.method == 'POST':
+        form = GoldPriceForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '✅ Gold price updated successfully!')
+            return redirect('dashboard')
+    else:
+        form = GoldPriceForm()
+
     context = {
         'latest_gold': latest_gold,
         'total_products': total_products,
         'total_sales': total_sales,
         'total_profit': total_profit,
         'low_stock': low_stock,
+        'gold_form': form,
     }
     return render(request, 'prototype/dashboard.html', context)
 
@@ -163,3 +173,28 @@ def report_profit(request):
         'date_to': date_to or '',
     }
     return render(request, 'prototype/reports/profit.html', context)
+
+def purchase_list(request):
+    purchases = Purchase.objects.select_related('product').order_by('-created_at')
+    return render(request, 'prototype/purchase_list.html', {'purchases': purchases})
+
+def purchase_create(request):
+    if request.method == 'POST':
+        form = PurchaseForm(request.POST)
+        if form.is_valid():
+            purchase = form.save()
+            inventory, created = Inventory.objects.get_or_create(
+                product=purchase.product,
+                defaults={'quantity_pieces': 0}
+            )
+            inventory.quantity_pieces += purchase.quantity_purchased
+            inventory.save()
+            messages.success(
+                request,
+                f'✅ Added {purchase.quantity_purchased} pieces of {purchase.product.name} to inventory!'
+            )
+            return redirect('purchase_list')
+    else:
+        form = PurchaseForm()
+
+    return render(request, 'prototype/purchase_create.html', {'form': form})

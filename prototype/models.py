@@ -78,6 +78,20 @@ class Sale(models.Model):
                 self.gold_price_at_sale = latest_gold.price_per_gram
         super().save(*args, **kwargs)
 
+class Purchase(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    quantity_purchased = models.PositiveIntegerField()
+    cost_per_piece = models.DecimalField(max_digits=10, decimal_places=2)
+    supplier_name = models.CharField(max_length=200, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_total_cost(self):
+        return self.cost_per_piece * self.quantity_purchased
+
+    def __str__(self):
+        return f"Purchase: {self.product.name} x{self.quantity_purchased} on {self.created_at.strftime('%Y-%m-%d')}"
+
 class SaleItem(models.Model):
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)

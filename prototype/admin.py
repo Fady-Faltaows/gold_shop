@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import GoldPrice, Category, Product, Inventory, Sale, SaleItem
+from .models import GoldPrice, Category, Product, Inventory, Sale, SaleItem, Purchase
 
 @admin.register(GoldPrice)
 class GoldPriceAdmin(admin.ModelAdmin):
@@ -38,3 +38,7 @@ class SaleAdmin(admin.ModelAdmin):
     readonly_fields = ('gold_price_at_sale', 'get_total', 'get_total_profit')
     inlines = [SaleItemInline]
 
+@admin.register(Purchase)
+class PurchaseAdmin(admin.ModelAdmin):
+    list_display = ('product', 'quantity_purchased', 'cost_per_piece', 'supplier_name', 'created_at')
+    ordering = ('-created_at',)

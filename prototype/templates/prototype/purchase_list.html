@@ -1,0 +1,39 @@
+{% extends 'prototype/base.html' %}
+{% block title %}Purchases{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2>📥 Purchase History</h2>
+    <a href="{% url 'purchase_create' %}" class="btn btn-warning">+ New Purchase</a>
+</div>
+<table class="table table-hover">
+    <thead class="table-warning">
+        <tr>
+            <th>#</th>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Cost/Piece</th>
+            <th>Total Cost</th>
+            <th>Supplier</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in purchases %}
+        <tr>
+            <td>{{ p.id }}</td>
+            <td>{{ p.product.name }}</td>
+            <td>{{ p.quantity_purchased }}</td>
+            <td>{{ p.cost_per_piece }}</td>
+            <td class="fw-bold">{{ p.get_total_cost }}</td>
+            <td>{{ p.supplier_name|default:"—" }}</td>
+            <td>{{ p.created_at|date:"Y-m-d" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" class="text-center text-muted">No purchases yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

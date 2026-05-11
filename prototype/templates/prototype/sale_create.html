@@ -159,5 +159,30 @@ document.getElementById('add-row').addEventListener('click', () => {
     tbody.appendChild(newRow);
     attachRowEvents(newRow);
 });
+function initTomSelect(row) {
+    const select = row.querySelector('.product-select');
+    // destroy existing instance if any (important for cloned rows)
+    if (select.tomselect) {
+        select.tomselect.destroy();
+    }
+    new TomSelect(select, {
+        placeholder: '— Search Product —',
+        allowEmptyOption: true,
+        onChange: function() {
+            calculateRow(row);
+        }
+    });
+}
+
+function attachRowEvents(row) {
+    initTomSelect(row);  // ← replaces the old change event listener
+    row.querySelector('.qty-input').addEventListener('input', () => calculateRow(row));
+    row.querySelector('.remove-row').addEventListener('click', () => {
+        if (document.querySelectorAll('.item-row').length > 1) {
+            row.remove();
+            updateGrandTotal();
+        }
+    });
+}
 </script>
 {% endblock %}

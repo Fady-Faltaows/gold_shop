@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 
 
 class GoldPrice(models.Model):
@@ -25,32 +26,48 @@ class Category(models.Model):
     class Meta:
         verbose_name_plural = "Categories"
 
-
 class Product(models.Model):
     KARAT_CHOICES = [
-        (18, '18K'),
-        (21, '21K'),
-        (22, '22K'),
         (24, '24K'),
+        (21, '21K'),
+        (18, '18K'),
+        (14, '14K'),
     ]
 
-    name             = models.CharField(max_length=200)
-    category         = models.ForeignKey(Category, on_delete=models.PROTECT)
-    karat            = models.IntegerField(choices=KARAT_CHOICES, default=21)
-    weight_grams     = models.DecimalField(max_digits=8, decimal_places=3)
-    workmanship_fee  = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    image           = models.ImageField(upload_to='products/', blank=True, null=True)  # ← add
-    notes            = models.TextField(blank=True)
-    created_at       = models.DateTimeField(auto_now_add=True)
+    KARAT_PURITY = {
+        24: Decimal('1.0'),
+        21: Decimal('0.875'),
+        18: Decimal('0.75'),
+        14: Decimal('0.585'),
+    }
+
+    name            = models.CharField(max_length=200)
+    category        = models.ForeignKey(Category, on_delete=models.PROTECT)
+    karat           = models.IntegerField(choices=KARAT_CHOICES, default=21)
+    weight_grams    = models.DecimalField(max_digits=8, decimal_places=3)
+    workmanship_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    image           = models.ImageField(upload_to='products/', blank=True, null=True)
+    notes           = models.TextField(blank=True)
+    created_at      = models.DateTimeField(auto_now_add=True)
+
+    def get_purity(self):
+        return self.KARAT_PURITY.get(self.karat, Decimal('1.0'))
 
     def get_selling_price(self):
         latest = GoldPrice.objects.order_by('-updated_at').first()
         if latest:
-            return (latest.price_per_gram * self.weight_grams) + self.workmanship_fee
+            return (latest.price_per_gram * self.get_purity() * self.weight_grams) + self.workmanship_fee
+        return None
+
+    def get_cost_price(self):
+        latest = GoldPrice.objects.order_by('-updated_at').first()
+        if latest:
+            return latest.price_per_gram * self.get_purity() * self.weight_grams
         return None
 
     def __str__(self):
         return f"{self.name} ({self.karat}K - {self.weight_grams}g)"
+    
 
 
 class Inventory(models.Model):
@@ -108,8 +125,9 @@ class SaleItem(models.Model):
         if self.product:
             latest_gold = GoldPrice.objects.order_by('-updated_at').first()
             if latest_gold:
-                gold_price         = latest_gold.price_per_gram
-                self.cost_per_piece  = gold_price * self.product.weight_grams
+                gold_price           = latest_gold.price_per_gram
+                purity               = self.product.get_purity()
+                self.cost_per_piece  = gold_price * purity * self.product.weight_grams
                 self.price_per_piece = self.cost_per_piece + self.product.workmanship_fee
         super().save(*args, **kwargs)
 

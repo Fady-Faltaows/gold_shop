@@ -13,34 +13,74 @@
         <form method="post">
             {% csrf_token %}
             <div class="row g-3">
+
                 <div class="col-md-6">
                     <label class="form-label fw-bold">
                         Product
-                        <a href="{% url 'product_create' %}" 
-                        class="btn btn-sm btn-outline-warning ms-2"
-                        target="_blank">
+                        <a href="{% url 'product_create' %}"
+                           class="btn btn-sm btn-outline-warning ms-2"
+                           target="_blank">
                             + New Product
                         </a>
                     </label>
-                    {{ form.product }}
+                    <select name="product" class="form-select" id="id_product">
+                        <option value="">— Select Product —</option>
+                        {% for p in products %}
+                        <option value="{{ p.id }}"
+                            data-weight="{{ p.weight_grams }}"
+                            data-karat="{{ p.karat }}"
+                            data-purity="{{ p.get_purity }}">
+                            {{ p.name }} ({{ p.karat }}K — {{ p.weight_grams }}g)
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
+
                 <div class="col-md-3">
                     <label class="form-label fw-bold">Quantity</label>
                     {{ form.quantity_purchased }}
                 </div>
+
                 <div class="col-md-3">
                     <label class="form-label fw-bold">Cost per Piece</label>
-                    {{ form.cost_per_piece }}
+                    <input type="text" class="form-control bg-light"
+                        id="cost-display" value="Auto calculated" readonly>
+                    <small class="text-muted">Gold price × purity × weight</small>
                 </div>
+
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Supplier Name</label>
                     {{ form.supplier_name }}
                 </div>
+
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Notes</label>
                     {{ form.notes }}
                 </div>
             </div>
+
+            {# Product info preview #}
+            <div id="product-info" class="alert alert-warning mt-3" style="display:none">
+                <div class="row text-center">
+                    <div class="col">
+                        <small class="text-muted d-block">Karat</small>
+                        <strong id="info-karat">—</strong>
+                    </div>
+                    <div class="col">
+                        <small class="text-muted d-block">Purity</small>
+                        <strong id="info-purity">—</strong>
+                    </div>
+                    <div class="col">
+                        <small class="text-muted d-block">Weight</small>
+                        <strong id="info-weight">—</strong> g
+                    </div>
+                    <div class="col">
+                        <small class="text-muted d-block">Cost per Piece</small>
+                        <strong id="info-cost" class="text-success">—</strong>
+                    </div>
+                </div>
+            </div>
+
             <div class="mt-4">
                 <button type="submit" class="btn btn-warning fw-bold px-4">
                     💾 Save Purchase
@@ -49,4 +89,37 @@
         </form>
     </div>
 </div>
+
+<script>
+const goldPrice = {{ gold_price_js|default:0 }};
+
+const purityMap = {
+    24: 1.0,
+    21: 0.875,
+    18: 0.75,
+    14: 0.585,
+};
+
+document.getElementById('id_product').addEventListener('change', function() {
+    const select = this;
+    const option = select.options[select.selectedIndex];
+
+    if (option && option.value) {
+        const weight  = parseFloat(option.dataset.weight) || 0;
+        const karat   = parseInt(option.dataset.karat)    || 0;
+        const purity  = purityMap[karat]                  || 1.0;
+        const cost    = goldPrice * purity * weight;
+
+        document.getElementById('info-karat').textContent  = karat + 'K';
+        document.getElementById('info-purity').textContent = (purity * 100).toFixed(1) + '%';
+        document.getElementById('info-weight').textContent = weight.toFixed(3);
+        document.getElementById('info-cost').textContent   = cost.toFixed(2);
+        document.getElementById('cost-display').value      = cost.toFixed(2);
+        document.getElementById('product-info').style.display = 'block';
+    } else {
+        document.getElementById('product-info').style.display = 'none';
+        document.getElementById('cost-display').value = 'Auto calculated';
+    }
+});
+</script>
 {% endblock %}

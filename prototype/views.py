@@ -130,24 +130,42 @@ def purchase_create(request):
     if request.method == 'POST':
         form = PurchaseForm(request.POST)
         if form.is_valid():
-            purchase = form.save()
+            purchase    = form.save(commit=False)
+            latest_gold = GoldPrice.objects.order_by('-updated_at').first()
+
+            if not latest_gold:
+                messages.error(request, '⚠️ Cannot create purchase — no gold price set!')
+                return redirect('purchase_create')
+
+            purity                  = purchase.product.get_purity()
+            purchase.cost_per_piece = latest_gold.price_per_gram * purity * purchase.product.weight_grams
+            purchase.save()
+
             inventory, created = Inventory.objects.get_or_create(
                 product=purchase.product,
                 defaults={'quantity_pieces': 0}
             )
             inventory.quantity_pieces += purchase.quantity_purchased
             inventory.save()
+
             messages.success(
                 request,
                 f'✅ Added {purchase.quantity_purchased} pieces of '
-                f'{purchase.product.name} to inventory!'
+                f'{purchase.product.name} to inventory! '
+                f'Cost per piece: {purchase.cost_per_piece:.2f}'
             )
             return redirect('purchase_list')
     else:
         form = PurchaseForm()
 
-    return render(request, 'prototype/purchase_create.html', {'form': form})
+    latest_gold = GoldPrice.objects.order_by('-updated_at').first()
+    products    = Product.objects.select_related('category').all()
 
+    return render(request, 'prototype/purchase_create.html', {
+        'form': form,
+        'gold_price_js': float(latest_gold.price_per_gram) if latest_gold else 0,
+        'products': products,
+    })
 
 def reports_home(request):
     return render(request, 'prototype/reports/home.html')
@@ -199,7 +217,7 @@ def report_inventory(request):
 def report_profit(request):
     date_from = request.GET.get('date_from')
     date_to   = request.GET.get('date_to')
-    sales     = Sale.objects.order_by('created_at')
+    sales     = Sale.objects.order_by('created_at').prefetch_related('items__product')
 
     if date_from:
         sales = sales.filter(created_at__date__gte=date_from)
@@ -209,10 +227,16 @@ def report_profit(request):
         thirty_days_ago = timezone.now() - timedelta(days=30)
         sales = sales.filter(created_at__gte=thirty_days_ago)
 
-    profit_by_day = {}
+    current_gold = GoldPrice.objects.order_by('-updated_at').first()
+
+    profit_by_day     = {}
+    total_gold_diff   = 0
+
     for sale in sales:
         day = sale.created_at.strftime('%Y-%m-%d')
         profit_by_day[day] = profit_by_day.get(day, 0) + float(sale.get_total_profit())
+        for item in sale.items.all():
+            total_gold_diff += float(item.get_gold_price_difference())
 
     total_profit  = sum(profit_by_day.values())
     total_revenue = sum(float(sale.get_total()) for sale in sales)
@@ -222,6 +246,8 @@ def report_profit(request):
         'profit_by_day': profit_by_day,
         'total_profit': total_profit,
         'total_revenue': total_revenue,
+        'total_gold_diff': total_gold_diff,
+        'current_gold': current_gold,
         'date_from': date_from or '',
         'date_to': date_to or '',
     }

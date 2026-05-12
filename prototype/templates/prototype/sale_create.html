@@ -39,6 +39,7 @@
                         <th>Product</th>
                         <th>Weight (g)</th>
                         <th>Karat</th>
+                        <th>Purity</th>
                         <th>Workmanship</th>
                         <th>Unit Price</th>
                         <th>Qty</th>
@@ -56,15 +57,17 @@
                                 <option value="{{ p.id }}"
                                     data-weight="{{ p.weight_grams }}"
                                     data-karat="{{ p.karat }}"
+                                    data-purity="{{ p.get_purity }}"
                                     data-workmanship="{{ p.workmanship_fee }}"
                                     data-stock="{{ p.inventory.quantity_pieces|default:0 }}">
-                                    {{ p.name }} ({{ p.karat }}K)
+                                    {{ p.name }} ({{ p.karat }}K) — Stock: {{ p.inventory.quantity_pieces|default:0 }}
                                 </option>
                                 {% endfor %}
                             </select>
                         </td>
                         <td><span class="weight-display">—</span></td>
                         <td><span class="karat-display">—</span></td>
+                        <td><span class="purity-display">—</span></td>
                         <td><span class="work-display">—</span></td>
                         <td><span class="price-display fw-bold text-success">—</span></td>
                         <td>
@@ -110,18 +113,19 @@ function calculateRow(row) {
         const weight      = parseFloat(option.dataset.weight)      || 0;
         const workmanship = parseFloat(option.dataset.workmanship) || 0;
         const karat       = option.dataset.karat                   || '—';
+        const purity      = parseFloat(option.dataset.purity)      || 1.0;
         const stock       = parseInt(option.dataset.stock)         || 0;
-        const unitPrice   = (goldPrice * weight) + workmanship;
+        const unitPrice   = (goldPrice * purity * weight) + workmanship;
         const subtotal    = unitPrice * qty;
 
         row.querySelector('.weight-display').textContent   = weight.toFixed(3);
         row.querySelector('.karat-display').textContent    = karat + 'K';
+        row.querySelector('.purity-display').textContent   = (purity * 100).toFixed(1) + '%';
         row.querySelector('.work-display').textContent     = workmanship.toFixed(2);
         row.querySelector('.price-display').textContent    = unitPrice.toFixed(2);
         row.querySelector('.subtotal-display').textContent = subtotal.toFixed(2);
         row.querySelector('.stock-display').textContent    = stock;
 
-        // stock warning — turn row red if over stock
         const qtyInput = row.querySelector('.qty-input');
         if (qty > stock) {
             qtyInput.classList.add('is-invalid');
@@ -134,6 +138,7 @@ function calculateRow(row) {
     } else {
         row.querySelector('.weight-display').textContent   = '—';
         row.querySelector('.karat-display').textContent    = '—';
+        row.querySelector('.purity-display').textContent   = '—';
         row.querySelector('.work-display').textContent     = '—';
         row.querySelector('.price-display').textContent    = '—';
         row.querySelector('.subtotal-display').textContent = '—';
@@ -201,6 +206,7 @@ document.getElementById('add-row').addEventListener('click', () => {
     newRow.querySelector('.qty-input').classList.remove('is-invalid');
     newRow.querySelector('.weight-display').textContent    = '—';
     newRow.querySelector('.karat-display').textContent     = '—';
+    newRow.querySelector('.purity-display').textContent    = '—';
     newRow.querySelector('.work-display').textContent      = '—';
     newRow.querySelector('.price-display').textContent     = '—';
     newRow.querySelector('.subtotal-display').textContent  = '—';

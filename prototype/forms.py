@@ -44,20 +44,28 @@ class SaleItemForm(forms.ModelForm):
 class PurchaseForm(forms.ModelForm):
     class Meta:
         model = Purchase
-        fields = ['product', 'quantity_purchased', 'cost_per_piece', 'supplier_name', 'notes']
+        fields = ['product', 'quantity_purchased', 'supplier_name', 'notes']
         widgets = {
-            'product': forms.Select(attrs={'class': 'form-select'}),
+            'product': forms.Select(attrs={'class': 'form-select', 'id': 'id_product'}),
             'quantity_purchased': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': 1
             }),
-            'cost_per_piece': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01'
-            }),
             'supplier_name': forms.TextInput(attrs={'class': 'form-control'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # add data attributes to each product option
+        self.fields['product'].queryset = Product.objects.select_related('category').all()
+        choices = [('', '— Select Product —')]
+        for p in Product.objects.all():
+            choices.append((p.id, f"{p.name} ({p.karat}K - {p.weight_grams}g)"))
+        self.fields['product'].widget.choices = choices
+
+    class Media:
+        pass
 
 
 class CategoryForm(forms.ModelForm):

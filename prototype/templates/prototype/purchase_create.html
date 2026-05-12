@@ -14,7 +14,14 @@
             {% csrf_token %}
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">Product</label>
+                    <label class="form-label fw-bold">
+                        Product
+                        <a href="{% url 'product_create' %}" 
+                        class="btn btn-sm btn-outline-warning ms-2"
+                        target="_blank">
+                            + New Product
+                        </a>
+                    </label>
                     {{ form.product }}
                 </div>
                 <div class="col-md-3">

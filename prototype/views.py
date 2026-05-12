@@ -3,8 +3,8 @@ from django.contrib import messages
 from django.db.models import Sum, Count
 from django.utils import timezone
 from datetime import timedelta
-from .models import GoldPrice, Product, Inventory, Sale, SaleItem, Purchase
-from .forms import SaleForm, SaleItemForm, GoldPriceForm, PurchaseForm
+from .models import GoldPrice, Category, Product, Inventory, Sale, SaleItem, Purchase
+from .forms import SaleForm, SaleItemForm, GoldPriceForm, PurchaseForm, ProductForm, CategoryForm
 
 
 def dashboard(request):
@@ -249,3 +249,37 @@ def report_gold_price(request):
         'chart_values': chart_values,
     }
     return render(request, 'prototype/reports/gold_price.html', context)
+
+
+def product_create(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '✅ Product added successfully!')
+            return redirect('product_list')
+    else:
+        form = ProductForm()
+
+    categories = Category.objects.all()
+    return render(request, 'prototype/product_create.html', {
+        'form': form,
+        'categories': categories,
+    })
+
+def category_create(request):
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '✅ Category added successfully!')
+            # check if request came from product form
+            next_url = request.POST.get('next', 'category_list')
+            return redirect(next_url)
+    else:
+        form = CategoryForm()
+    return render(request, 'prototype/category_create.html', {'form': form})
+
+def category_list(request):
+    categories = Category.objects.all()
+    return render(request, 'prototype/category_list.html', {'categories': categories})

@@ -14,4 +14,7 @@ urlpatterns = [
     path('reports/inventory/', views.report_inventory, name='report_inventory'),
     path('reports/profit/', views.report_profit, name='report_profit'),
     path('reports/gold-price/', views.report_gold_price, name='report_gold_price'),
+    path('products/create/', views.product_create, name='product_create'),
+    path('categories/create/', views.category_create, name='category_create'),
+    path('categories/', views.category_list, name='category_list'),
 ]

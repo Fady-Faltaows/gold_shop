@@ -2,6 +2,10 @@
 {% block title %}Products{% endblock %}
 
 {% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2>Products</h2>
+    <a href="{% url 'product_create' %}" class="btn btn-warning">+ New Product</a>
+</div>
 <h2 class="mb-4">Products</h2>
 <table class="table table-hover">
     <thead class="table-warning">
@@ -12,6 +16,7 @@
             <th>Weight (g)</th>
             <th>Workmanship</th>
             <th>Selling Price</th>
+            <th>Image</th>
         </tr>
     </thead>
     <tbody>
@@ -23,6 +28,14 @@
             <td>{{ product.weight_grams }}</td>
             <td>{{ product.workmanship_fee }}</td>
             <td class="fw-bold text-success">{{ product.get_selling_price }}</td>
+            <td>
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" width="50" height="50"
+                        style="object-fit:cover; border-radius:6px;">
+                {% else %}
+                    <span class="text-muted">—</span>
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>

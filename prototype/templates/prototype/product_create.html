@@ -1,0 +1,59 @@
+{% extends 'prototype/base.html' %}
+{% block title %}Add Product{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2>➕ Add New Product</h2>
+    <a href="{% url 'product_list' %}" class="btn btn-secondary">← Back</a>
+</div>
+
+<div class="card border-warning">
+    <div class="card-header bg-warning text-dark fw-bold">Product Details</div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Name</label>
+                    {{ form.name }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Category
+                        <a href="{% url 'category_create' %}?next=product_create"
+                           class="btn btn-sm btn-outline-warning ms-2">
+                            + New Category
+                        </a>
+                    </label>
+                    {{ form.category }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Karat</label>
+                    {{ form.karat }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Weight (grams)</label>
+                    {{ form.weight_grams }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Workmanship Fee</label>
+                    {{ form.workmanship_fee }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Product Image</label>
+                    {{ form.image }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Notes</label>
+                    {{ form.notes }}
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-warning fw-bold px-4">
+                    💾 Save Product
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

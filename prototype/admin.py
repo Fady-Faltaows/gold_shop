@@ -1,5 +1,11 @@
 from django.contrib import admin
-from .models import GoldPrice, Category, Product, Inventory, Sale, SaleItem, Purchase, UserProfile
+from .models import GoldPrice, Category, Product, Inventory, Sale, SaleItem, Purchase, UserProfile, Branch
+
+@admin.register(Branch)
+class BranchAdmin(admin.ModelAdmin):
+    list_display  = ('name', 'address', 'phone', 'is_active', 'created_at')
+    search_fields = ('name',)
+    list_filter   = ('is_active',)
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):

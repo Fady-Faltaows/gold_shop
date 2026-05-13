@@ -1,4 +1,5 @@
 {% extends 'prototype/base.html' %}
+{% load custom_filters %}
 {% block title %}New Sale{% endblock %}
 
 {% block content %}
@@ -13,7 +14,55 @@
     {% endif %}
 </div>
 
-<form method="post">
+{# Branch Selector — Admin only — GET form منفصل تماماً #}
+{% if request.user.profile.is_admin %}
+<div class="card mb-4 border-warning">
+    <div class="card-header bg-warning text-dark fw-bold">
+        🏪 Select Branch
+    </div>
+    <div class="card-body">
+        <form method="get" action="{% url 'sale_create' %}">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Branch</label>
+                    <select name="branch" class="form-select">
+                        <option value="">— Select Branch —</option>
+                        {% for b in branches %}
+                        <option value="{{ b.id }}"
+                            {% if selected_branch.id == b.id %}selected{% endif %}>
+                            {{ b.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-warning fw-bold w-100">
+                        Load Products
+                    </button>
+                </div>
+            </div>
+        </form>
+        {% if selected_branch %}
+        <div class="mt-2">
+            <span class="badge bg-warning text-dark">
+                🏪 {{ selected_branch.name }}
+            </span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{# لو أدمن ومحددش فرع #}
+{% if request.user.profile.is_admin and not selected_branch %}
+<div class="alert alert-warning">
+    ⚠️ Please select a branch first to load products.
+</div>
+
+{% else %}
+
+{# Sale Form — POST منفصل #}
+<form method="post" action="{% url 'sale_create' %}{% if selected_branch %}?branch={{ selected_branch.id }}{% endif %}">
     {% csrf_token %}
 
     <div class="card mb-4">
@@ -59,8 +108,8 @@
                                     data-karat="{{ p.karat }}"
                                     data-purity="{{ p.get_purity }}"
                                     data-workmanship="{{ p.workmanship_fee }}"
-                                    data-stock="{{ p.inventory.quantity_pieces|default:0 }}">
-                                    {{ p.name }} ({{ p.karat }}K) — Stock: {{ p.inventory.quantity_pieces|default:0 }}
+                                    data-stock="{{ inventory_map|get_item:p.id }}">
+                                    {{ p.name }} ({{ p.karat }}K) — Stock: {{ inventory_map|get_item:p.id }}
                                 </option>
                                 {% endfor %}
                             </select>
@@ -101,6 +150,8 @@
     </div>
 </form>
 
+{% endif %}
+
 <script>
 const goldPrice = {{ gold_price_js }};
 
@@ -134,7 +185,6 @@ function calculateRow(row) {
             qtyInput.classList.remove('is-invalid');
             qtyInput.max = stock;
         }
-
     } else {
         row.querySelector('.weight-display').textContent   = '—';
         row.querySelector('.karat-display').textContent    = '—';
@@ -146,7 +196,6 @@ function calculateRow(row) {
         row.querySelector('.qty-input').classList.remove('is-invalid');
         row.querySelector('.qty-input').removeAttribute('max');
     }
-
     updateGrandTotal();
 }
 
@@ -170,8 +219,7 @@ function attachRowEvents(row) {
     });
 }
 
-// prevent form submit if any row has invalid quantity
-document.querySelector('form').addEventListener('submit', function(e) {
+document.querySelector('form[method="post"]')?.addEventListener('submit', function(e) {
     let hasError = false;
     document.querySelectorAll('.item-row').forEach(row => {
         const select = row.querySelector('.product-select');
@@ -191,11 +239,10 @@ document.querySelector('form').addEventListener('submit', function(e) {
     }
 });
 
-// init first row
-attachRowEvents(document.querySelector('.item-row'));
+const firstRow = document.querySelector('.item-row');
+if (firstRow) attachRowEvents(firstRow);
 
-// add new row
-document.getElementById('add-row').addEventListener('click', () => {
+document.getElementById('add-row')?.addEventListener('click', () => {
     const tbody    = document.getElementById('items-body');
     const firstRow = document.querySelector('.item-row');
     const newRow   = firstRow.cloneNode(true);

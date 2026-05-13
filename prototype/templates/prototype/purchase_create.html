@@ -80,6 +80,15 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Branch</label>
+                <select name="branch" class="form-select" required>
+                    <option value="">— Select Branch —</option>
+                    {% for b in branches %}
+                    <option value="{{ b.id }}">{{ b.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
             <div class="mt-4">
                 <button type="submit" class="btn btn-warning fw-bold px-4">

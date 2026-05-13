@@ -5,6 +5,19 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
+class Branch(models.Model):
+    name       = models.CharField(max_length=200)
+    address    = models.TextField(blank=True)
+    phone      = models.CharField(max_length=20, blank=True)
+    is_active  = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "Branches"
+
 class GoldPrice(models.Model):
     price_per_gram = models.DecimalField(max_digits=10, decimal_places=2)
     updated_at     = models.DateTimeField(auto_now=True)
@@ -74,21 +87,24 @@ class Product(models.Model):
 
 
 class Inventory(models.Model):
-    product         = models.OneToOneField(Product, on_delete=models.CASCADE)
+    product         = models.ForeignKey(Product, on_delete=models.CASCADE)
+    branch          = models.ForeignKey(Branch, on_delete=models.CASCADE, null=True)
     quantity_pieces = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f"{self.product.name} — {self.quantity_pieces} pcs"
+        return f"{self.product.name} — {self.branch.name} — {self.quantity_pieces} pcs"
 
     class Meta:
         verbose_name_plural = "Inventory"
+        unique_together     = ('product', 'branch')
 
 
 class Sale(models.Model):
-    created_at          = models.DateTimeField(auto_now_add=True)
-    customer_name       = models.CharField(max_length=200, blank=True)
-    notes               = models.TextField(blank=True)
-    gold_price_at_sale  = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at         = models.DateTimeField(auto_now_add=True)
+    customer_name      = models.CharField(max_length=200, blank=True)
+    notes              = models.TextField(blank=True)
+    gold_price_at_sale = models.DecimalField(max_digits=10, decimal_places=2)
+    branch             = models.ForeignKey(Branch, on_delete=models.PROTECT, null=True)
 
     def get_total(self):
         return sum(item.get_subtotal() for item in self.items.all()) or 0
@@ -104,7 +120,7 @@ class Sale(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Sale #{self.id} — {self.created_at.strftime('%Y-%m-%d')}"
+        return f"Sale #{self.id} — {self.branch} — {self.created_at.strftime('%Y-%m-%d')}"
 
 
 class SaleItem(models.Model):
@@ -137,21 +153,21 @@ class SaleItem(models.Model):
     def __str__(self):
         return f"{self.product.name} x{self.quantity}"
 
-
 class Purchase(models.Model):
-    product             = models.ForeignKey(Product, on_delete=models.PROTECT)
-    quantity_purchased  = models.PositiveIntegerField()
-    cost_per_piece      = models.DecimalField(max_digits=10, decimal_places=2)
-    supplier_name       = models.CharField(max_length=200, blank=True)
-    notes               = models.TextField(blank=True)
-    created_at          = models.DateTimeField(auto_now_add=True)
+    product            = models.ForeignKey(Product, on_delete=models.PROTECT)
+    branch             = models.ForeignKey(Branch, on_delete=models.PROTECT, null=True)
+    quantity_purchased = models.PositiveIntegerField()
+    cost_per_piece     = models.DecimalField(max_digits=10, decimal_places=2)
+    supplier_name      = models.CharField(max_length=200, blank=True)
+    notes              = models.TextField(blank=True)
+    created_at         = models.DateTimeField(auto_now_add=True)
 
     def get_total_cost(self):
         return self.cost_per_piece * self.quantity_purchased
 
     def __str__(self):
-        return f"Purchase: {self.product.name} x{self.quantity_purchased} on {self.created_at.strftime('%Y-%m-%d')}"
-    
+        return f"Purchase: {self.product.name} x{self.quantity_purchased} — {self.branch}"
+
 class UserProfile(models.Model):
     ROLE_CHOICES = [
         ('admin', 'Admin'),
@@ -160,6 +176,7 @@ class UserProfile(models.Model):
 
     user       = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     role       = models.CharField(max_length=20, choices=ROLE_CHOICES, default='cashier')
+    branch     = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def is_admin(self):

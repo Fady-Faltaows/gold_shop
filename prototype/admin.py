@@ -1,6 +1,11 @@
 from django.contrib import admin
-from .models import GoldPrice, Category, Product, Inventory, Sale, SaleItem, Purchase
+from .models import GoldPrice, Category, Product, Inventory, Sale, SaleItem, Purchase, UserProfile
 
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display  = ('user', 'role', 'created_at')
+    list_filter   = ('role',)
+    search_fields = ('user__username',)
 
 @admin.register(GoldPrice)
 class GoldPriceAdmin(admin.ModelAdmin):

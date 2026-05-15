@@ -39,6 +39,7 @@
             <th>Gold Price</th>
             <th>Total</th>
             <th>Profit</th>
+            <th></th>
             <th>Date</th>
         </tr>
     </thead>
@@ -46,7 +47,7 @@
         {% for sale in sales %}
         <tr>
             <td>{{ sale.id }}</td>
-            <td>{{ sale.customer_name|default:"—" }}</td>
+            <td>{{ sale.customer|default:sale.customer_name|default:"—" }}</td>
             <td>
                 <span class="badge bg-info">
                     {{ sale.branch.name|default:"—" }}
@@ -55,11 +56,17 @@
             <td>{{ sale.gold_price_at_sale }}</td>
             <td class="fw-bold">{{ sale.get_total }}</td>
             <td class="text-success">{{ sale.get_total_profit }}</td>
+            <td>
+                <a href="{% url 'sale_receipt' sale.id %}" class="btn btn-sm btn-outline-warning">Receipt</a>
+                {% if request.user.profile.is_admin %}
+                    <a href="{% url 'sale_return_create' sale.id %}" class="btn btn-sm btn-outline-danger">Return</a>
+                {% endif %}
+            </td>
             <td>{{ sale.created_at|date:"Y-m-d H:i" }}</td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="7" class="text-center text-muted">No sales found.</td>
+            <td colspan="8" class="text-center text-muted">No sales found.</td>
         </tr>
         {% endfor %}
     </tbody>

@@ -10,8 +10,11 @@
 <table class="table table-hover">
     <thead class="table-warning">
         <tr>
+            <th>Code</th>
+            <th>SKU</th>
             <th>Name</th>
             <th>Category</th>
+            <th>Supplier</th>
             <th>Karat</th>
             <th>Weight (g)</th>
             <th>Workmanship</th>
@@ -22,8 +25,11 @@
     <tbody>
         {% for product in products %}
         <tr>
+            <td>{{ product.product_code }}</td>
+            <td>{{ product.sku|default:"—" }}</td>
             <td>{{ product.name }}</td>
             <td>{{ product.category }}</td>
+            <td>{{ product.preferred_supplier|default:"—" }}</td>
             <td>{{ product.karat }}K</td>
             <td>{{ product.weight_grams }}</td>
             <td>{{ product.workmanship_fee }}</td>

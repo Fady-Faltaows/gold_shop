@@ -15,6 +15,7 @@
             <th>Cost/Piece</th>
             <th>Total Cost</th>
             <th>Supplier</th>
+            <th></th>
             <th>Date</th>
         </tr>
     </thead>
@@ -22,16 +23,17 @@
         {% for p in purchases %}
         <tr>
             <td>{{ p.id }}</td>
-            <td>{{ p.product.name }}</td>
+            <td>{{ p.product.product_code }} - {{ p.product.name }}</td>
             <td>{{ p.quantity_purchased }}</td>
             <td>{{ p.cost_per_piece }}</td>
             <td class="fw-bold">{{ p.get_total_cost }}</td>
-            <td>{{ p.supplier_name|default:"—" }}</td>
+            <td>{{ p.supplier|default:p.supplier_name|default:"—" }}</td>
+            <td><a href="{% url 'purchase_invoice' p.id %}" class="btn btn-sm btn-outline-warning">Invoice</a></td>
             <td>{{ p.created_at|date:"Y-m-d" }}</td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="7" class="text-center text-muted">No purchases yet.</td>
+            <td colspan="8" class="text-center text-muted">No purchases yet.</td>
         </tr>
         {% endfor %}
     </tbody>

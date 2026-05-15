@@ -13,6 +13,14 @@
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">SKU</label>
+                    {{ form.sku }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Barcode</label>
+                    {{ form.barcode }}
+                </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Name</label>
                     {{ form.name }}
@@ -38,6 +46,14 @@
                 <div class="col-md-4">
                     <label class="form-label fw-bold">Workmanship Fee</label>
                     {{ form.workmanship_fee }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Low Stock Alert</label>
+                    {{ form.low_stock_threshold }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Preferred Supplier</label>
+                    {{ form.preferred_supplier }}
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Product Image</label>

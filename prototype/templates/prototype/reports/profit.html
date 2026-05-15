@@ -2,24 +2,41 @@
 {% block title %}Profit Report{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">💰 Profit Report</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>💰 Profit Report</h2>
+    <a href="{% url 'reports_home' %}" class="btn btn-secondary">← Back</a>
+</div>
 
+{# Filters #}
 <form method="get" class="card p-3 mb-4 bg-light">
     <div class="row g-2 align-items-end">
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <label class="form-label">Branch</label>
+            <select name="branch" class="form-select">
+                <option value="">All Branches</option>
+                {% for b in branches %}
+                <option value="{{ b.id }}"
+                    {% if selected_branch == b.id|stringformat:"s" %}selected{% endif %}>
+                    {{ b.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
             <label class="form-label">From</label>
             <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label class="form-label">To</label>
             <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <button type="submit" class="btn btn-warning w-100">Filter</button>
         </div>
     </div>
 </form>
 
+{# Summary Cards #}
 <div class="row g-3 mb-4">
     <div class="col-md-6">
         <div class="card text-center">
@@ -39,22 +56,70 @@
     </div>
 </div>
 
-<table class="table table-hover">
-    <thead class="table-warning">
-        <tr>
-            <th>Date</th>
-            <th>Daily Profit</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for day, profit in profit_by_day.items %}
-        <tr>
-            <td>{{ day }}</td>
-            <td class="text-success fw-bold">{{ profit }}</td>
-        </tr>
-        {% empty %}
-            <tr><td colspan="2" class="text-center text-muted">No data found.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
+{# Branch Profit Summary #}
+{% if not selected_branch %}
+<div class="card mb-4">
+    <div class="card-header bg-warning text-dark fw-bold">📊 Profit Per Branch</div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Branch</th>
+                    <th>Revenue</th>
+                    <th>Profit</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bt in branch_totals %}
+                <tr>
+                    <td><span class="badge bg-warning text-dark">{{ bt.branch.name }}</span></td>
+                    <td>{{ bt.revenue }}</td>
+                    <td class="text-success fw-bold">{{ bt.profit }}</td>
+                    <td>
+                        <a href="?branch={{ bt.branch.id }}"
+                           class="btn btn-sm btn-outline-warning">
+                            View Details
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr class="table-warning fw-bold">
+                    <td>Total</td>
+                    <td>{{ total_revenue }}</td>
+                    <td class="text-success">{{ total_profit }}</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{# Daily Profit Table #}
+<div class="card">
+    <div class="card-header bg-warning text-dark fw-bold">📅 Daily Profit</div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th>Daily Profit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day, profit in profit_by_day.items %}
+                <tr>
+                    <td>{{ day }}</td>
+                    <td class="text-success fw-bold">{{ profit }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center text-muted py-3">No data found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'prototype/base.html' %}
+{% block title %}Expenses{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2>Expenses</h2>
+    <a href="{% url 'expense_create' %}" class="btn btn-warning">+ New Expense</a>
+</div>
+
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Branch</label>
+            <select name="branch" class="form-select">
+                <option value="">All Branches</option>
+                {% for b in branches %}
+                <option value="{{ b.id }}" {% if selected_branch == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-warning w-100">Filter</button>
+        </div>
+    </div>
+</form>
+
+<table class="table table-hover">
+    <thead class="table-warning">
+        <tr>
+            <th>Date</th>
+            <th>Branch</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for expense in expenses %}
+        <tr>
+            <td>{{ expense.paid_at }}</td>
+            <td>{{ expense.branch.name|default:"—" }}</td>
+            <td>{{ expense.get_category_display }}</td>
+            <td>{{ expense.description }}</td>
+            <td>{{ expense.amount }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center text-muted">No expenses found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

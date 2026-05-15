@@ -23,6 +23,8 @@
                             + New Product
                         </a>
                     </label>
+                    <input type="search" class="form-control form-control-sm mb-2"
+                           id="product-search" placeholder="Search products">
                     <select name="product" class="form-select" id="id_product">
                         <option value="">— Select Product —</option>
                         {% for p in products %}
@@ -30,7 +32,7 @@
                             data-weight="{{ p.weight_grams }}"
                             data-karat="{{ p.karat }}"
                             data-purity="{{ p.get_purity }}">
-                            {{ p.name }} ({{ p.karat }}K — {{ p.weight_grams }}g)
+                            {{ p.product_code }} - {{ p.name }} ({{ p.karat }}K — {{ p.weight_grams }}g)
                         </option>
                         {% endfor %}
                     </select>
@@ -46,6 +48,17 @@
                     <input type="text" class="form-control bg-light"
                         id="cost-display" value="Auto calculated" readonly>
                     <small class="text-muted">Gold price × purity × weight</small>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Supplier
+                        <a href="{% url 'supplier_create' %}?next={{ request.get_full_path|urlencode }}"
+                           class="btn btn-sm btn-outline-warning ms-2">
+                            + New Supplier
+                        </a>
+                    </label>
+                    {{ form.supplier }}
                 </div>
 
                 <div class="col-md-6">
@@ -108,6 +121,19 @@ const purityMap = {
     18: 0.75,
     14: 0.585,
 };
+
+document.getElementById('product-search').addEventListener('input', function() {
+    const term = this.value.toLowerCase();
+    const select = document.getElementById('id_product');
+
+    Array.from(select.options).forEach(option => {
+        if (!option.value) {
+            option.hidden = false;
+            return;
+        }
+        option.hidden = !option.textContent.toLowerCase().includes(term);
+    });
+});
 
 document.getElementById('id_product').addEventListener('change', function() {
     const select = this;

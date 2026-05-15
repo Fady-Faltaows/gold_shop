@@ -37,7 +37,7 @@
     <tbody>
         {% for item in inventory %}
         <tr>
-            <td>{{ item.product.name }}</td>
+            <td>{{ item.product.product_code }} - {{ item.product.name }}</td>
             <td>{{ item.product.category }}</td>
             <td>{{ item.product.karat }}K</td>
             <td>{{ item.product.weight_grams }}</td>

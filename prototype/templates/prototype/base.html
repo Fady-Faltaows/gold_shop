@@ -30,9 +30,12 @@
                     {# Admin only #}
                     {% if request.user.is_authenticated and request.user.profile.is_admin %}
                         <a class="nav-link text-dark" href="{% url 'product_list' %}">💍 Products</a>
+                        <a class="nav-link text-dark" href="{% url 'customer_list' %}">Customers</a>
+                        <a class="nav-link text-dark" href="{% url 'supplier_list' %}">Suppliers</a>
                         <a class="nav-link text-dark" href="{% url 'category_list' %}">🗂️ Categories</a>
                         <a class="nav-link text-dark" href="{% url 'inventory_list' %}">📦 Inventory</a>
                         <a class="nav-link text-dark" href="{% url 'purchase_list' %}">📥 Purchases</a>
+                        <a class="nav-link text-dark" href="{% url 'expense_list' %}">Expenses</a>
                         <a class="nav-link text-dark" href="{% url 'reports_home' %}">📊 Reports</a>
                         <a class="nav-link text-dark" href="/admin">⚙️ Admin Panel</a>
                     {% endif %}

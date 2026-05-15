@@ -1,0 +1,61 @@
+{% extends 'prototype/base.html' %}
+{% block title %}Suppliers{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2>Suppliers</h2>
+    <a href="{% url 'supplier_create' %}" class="btn btn-warning">+ New Supplier</a>
+</div>
+
+<form method="get" class="mb-4">
+    <div class="row g-2">
+        <div class="col-md-6">
+            <input type="search" name="q" value="{{ query }}" class="form-control"
+                   placeholder="Search by name, code, contact, phone, or email">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-warning w-100">Search</button>
+        </div>
+    </div>
+</form>
+
+<table class="table table-hover">
+    <thead class="table-warning">
+        <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Contact</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Active</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for supplier in suppliers %}
+        <tr>
+            <td>{{ supplier.supplier_code }}</td>
+            <td>{{ supplier.name }}</td>
+            <td>{{ supplier.contact_person|default:"—" }}</td>
+            <td>{{ supplier.phone|default:"—" }}</td>
+            <td>{{ supplier.email|default:"—" }}</td>
+            <td>{% if supplier.is_active %}Yes{% else %}No{% endif %}</td>
+            <td class="text-end">
+                <a href="{% url 'supplier_purchase_history' supplier.id %}"
+                   class="btn btn-sm btn-outline-warning">Purchases</a>
+                <form method="post" action="{% url 'supplier_delete' supplier.id %}"
+                      class="d-inline"
+                      onsubmit="return confirm('Remove this supplier?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" class="text-center text-muted">No suppliers found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

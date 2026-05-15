@@ -1,0 +1,58 @@
+{% extends 'prototype/base.html' %}
+{% block title %}Customers{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2>Customers</h2>
+    <a href="{% url 'customer_create' %}" class="btn btn-warning">+ New Customer</a>
+</div>
+
+<form method="get" class="mb-4">
+    <div class="row g-2">
+        <div class="col-md-6">
+            <input type="search" name="q" value="{{ query }}" class="form-control"
+                   placeholder="Search by name, code, phone, or email">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-warning w-100">Search</button>
+        </div>
+    </div>
+</form>
+
+<table class="table table-hover">
+    <thead class="table-warning">
+        <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for customer in customers %}
+        <tr>
+            <td>{{ customer.customer_code }}</td>
+            <td>{{ customer.full_name }}</td>
+            <td>{{ customer.get_customer_type_display }}</td>
+            <td>{{ customer.get_status_display }}</td>
+            <td>{{ customer.phone|default:"—" }}</td>
+            <td>{{ customer.email|default:"—" }}</td>
+            <td class="text-end">
+                <form method="post" action="{% url 'customer_delete' customer.id %}"
+                      onsubmit="return confirm('Remove this customer?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" class="text-center text-muted">No customers found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

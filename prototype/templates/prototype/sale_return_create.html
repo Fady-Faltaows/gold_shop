@@ -1,0 +1,45 @@
+{% extends 'prototype/base.html' %}
+{% block title %}Return Sale #{{ sale.id }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2>Return Sale #{{ sale.id }}</h2>
+    <a href="{% url 'sale_list' %}" class="btn btn-secondary">Back</a>
+</div>
+
+<div class="card border-warning">
+    <div class="card-header bg-warning text-dark fw-bold">Return Details</div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Sold Item</label>
+                    {{ form.sale_item }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Quantity</label>
+                    {{ form.quantity }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Refund Amount</label>
+                    {{ form.refund_amount }}
+                </div>
+                <div class="col-md-12">
+                    <div class="form-check">
+                        {{ form.restock }}
+                        <label class="form-check-label fw-bold">Return item to stock</label>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">Reason</label>
+                    {{ form.reason }}
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-warning fw-bold px-4">Save Return</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -69,8 +69,22 @@
         <div class="card-header bg-warning text-dark fw-bold">Sale Info</div>
         <div class="card-body row g-3">
             <div class="col-md-6">
+                <label class="form-label">
+                    Customer
+                    <a href="{% url 'customer_create' %}?next={{ request.get_full_path|urlencode }}"
+                       class="btn btn-sm btn-outline-warning ms-2">
+                        + New Customer
+                    </a>
+                </label>
+                {{ sale_form.customer }}
+            </div>
+            <div class="col-md-6">
                 <label class="form-label">Customer Name</label>
                 {{ sale_form.customer_name }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Discount</label>
+                {{ sale_form.discount_amount }}
             </div>
             <div class="col-md-6">
                 <label class="form-label">Notes</label>
@@ -100,6 +114,8 @@
                 <tbody id="items-body">
                     <tr class="item-row">
                         <td>
+                            <input type="search" class="form-control form-control-sm product-search mb-2"
+                                   placeholder="Search products">
                             <select name="product" class="form-select product-select">
                                 <option value="">— Select Product —</option>
                                 {% for p in products %}
@@ -109,7 +125,7 @@
                                     data-purity="{{ p.get_purity }}"
                                     data-workmanship="{{ p.workmanship_fee }}"
                                     data-stock="{{ inventory_map|get_item:p.id }}">
-                                    {{ p.name }} ({{ p.karat }}K) — Stock: {{ inventory_map|get_item:p.id }}
+                                    {{ p.product_code }} - {{ p.name }} ({{ p.karat }}K) — Stock: {{ inventory_map|get_item:p.id }}
                                 </option>
                                 {% endfor %}
                             </select>
@@ -199,16 +215,32 @@ function calculateRow(row) {
     updateGrandTotal();
 }
 
+function filterProducts(row) {
+    const search = row.querySelector('.product-search');
+    const select = row.querySelector('.product-select');
+    const term   = (search.value || '').toLowerCase();
+
+    Array.from(select.options).forEach(option => {
+        if (!option.value) {
+            option.hidden = false;
+            return;
+        }
+        option.hidden = !option.textContent.toLowerCase().includes(term);
+    });
+}
+
 function updateGrandTotal() {
     let total = 0;
     document.querySelectorAll('.item-row').forEach(row => {
         const val = parseFloat(row.querySelector('.subtotal-display').textContent) || 0;
         total += val;
     });
-    document.getElementById('grand-total').textContent = total.toFixed(2);
+    const discount = parseFloat(document.getElementById('id_discount_amount')?.value) || 0;
+    document.getElementById('grand-total').textContent = Math.max(total - discount, 0).toFixed(2);
 }
 
 function attachRowEvents(row) {
+    row.querySelector('.product-search').addEventListener('input', () => filterProducts(row));
     row.querySelector('.product-select').addEventListener('change', () => calculateRow(row));
     row.querySelector('.qty-input').addEventListener('input',  () => calculateRow(row));
     row.querySelector('.remove-row').addEventListener('click', () => {
@@ -242,12 +274,15 @@ document.querySelector('form[method="post"]')?.addEventListener('submit', functi
 const firstRow = document.querySelector('.item-row');
 if (firstRow) attachRowEvents(firstRow);
 
+document.getElementById('id_discount_amount')?.addEventListener('input', updateGrandTotal);
+
 document.getElementById('add-row')?.addEventListener('click', () => {
     const tbody    = document.getElementById('items-body');
     const firstRow = document.querySelector('.item-row');
     const newRow   = firstRow.cloneNode(true);
 
     newRow.querySelector('.product-select').selectedIndex  = 0;
+    newRow.querySelector('.product-search').value          = '';
     newRow.querySelector('.qty-input').value               = 1;
     newRow.querySelector('.qty-input').removeAttribute('max');
     newRow.querySelector('.qty-input').classList.remove('is-invalid');
@@ -260,6 +295,7 @@ document.getElementById('add-row')?.addEventListener('click', () => {
     newRow.querySelector('.stock-display').textContent     = '—';
 
     tbody.appendChild(newRow);
+    filterProducts(newRow);
     attachRowEvents(newRow);
 });
 </script>

@@ -124,6 +124,8 @@
                                     data-karat="{{ p.karat }}"
                                     data-purity="{{ p.get_purity }}"
                                     data-workmanship="{{ p.workmanship_fee }}"
+                                    data-barcode="{{ p.barcode|default:'' }}"
+                                    data-sku="{{ p.sku|default:'' }}"
                                     data-stock="{{ inventory_map|get_item:p.id }}">
                                     {{ p.product_code }} - {{ p.name }} ({{ p.karat }}K)
                                 </option>
@@ -245,15 +247,34 @@ function calculateRow(row) {
 function filterProducts(row) {
     const search = row.querySelector('.product-search');
     const select = row.querySelector('.product-select');
-    const term   = (search.value || '').toLowerCase();
+    const term   = (search.value || '').toLowerCase().trim();
+
+    let exactMatch = null;
 
     Array.from(select.options).forEach(option => {
         if (!option.value) {
             option.hidden = false;
             return;
         }
-        option.hidden = !option.textContent.toLowerCase().includes(term);
+        
+        const textContent = option.textContent.toLowerCase();
+        const barcode = (option.dataset.barcode || '').toLowerCase();
+        const sku = (option.dataset.sku || '').toLowerCase();
+        
+        const isMatch = textContent.includes(term) || barcode === term || sku === term;
+        option.hidden = !isMatch;
+
+        if (term && (barcode === term || sku === term)) {
+            exactMatch = option.value;
+        }
     });
+
+    if (exactMatch) {
+        select.value = exactMatch;
+        calculateRow(row);
+        // Optional: clear search after exact match
+        // search.value = ''; 
+    }
 }
 
 function updateGrandTotal() {

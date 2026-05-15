@@ -26,6 +26,8 @@
                     <option value="{{ p.id }}"
                         data-weight="{{ p.weight_grams }}"
                         data-karat="{{ p.karat }}"
+                        data-barcode="{{ p.barcode|default:'' }}"
+                        data-sku="{{ p.sku|default:'' }}"
                         data-purity="{{ p.get_purity }}">
                         {{ p.product_code }} - {{ p.name }} ({{ p.karat }}K — {{ p.weight_grams }}g)
                     </option>
@@ -139,16 +141,32 @@ const purityMap = {
 };
 
 document.getElementById('product-search').addEventListener('input', function() {
-    const term = this.value.toLowerCase();
+    const term = this.value.toLowerCase().trim();
     const select = document.getElementById('id_product');
+    let exactMatch = null;
 
     Array.from(select.options).forEach(option => {
         if (!option.value) {
             option.hidden = false;
             return;
         }
-        option.hidden = !option.textContent.toLowerCase().includes(term);
+        
+        const textContent = option.textContent.toLowerCase();
+        const barcode = (option.dataset.barcode || '').toLowerCase();
+        const sku = (option.dataset.sku || '').toLowerCase();
+        
+        const isMatch = textContent.includes(term) || barcode === term || sku === term;
+        option.hidden = !isMatch;
+
+        if (term && (barcode === term || sku === term)) {
+            exactMatch = option.value;
+        }
     });
+
+    if (exactMatch) {
+        select.value = exactMatch;
+        select.dispatchEvent(new Event('change'));
+    }
 });
 
 document.getElementById('id_product').addEventListener('change', function() {

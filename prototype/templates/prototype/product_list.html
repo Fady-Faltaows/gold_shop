@@ -4,15 +4,19 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 style="margin: 0;">💍 Products</h2>
-    <a href="{% url 'product_create' %}" class="stitch-btn stitch-btn-primary">+ New Product</a>
+    <div class="d-flex gap-2">
+        <input type="search" id="product-list-search" class="stitch-input" placeholder="Search by name, code, sku, or barcode..." style="width: 350px;">
+        <a href="{% url 'product_create' %}" class="stitch-btn stitch-btn-primary">+ New Product</a>
+    </div>
 </div>
 
 <div class="stitch-table-container">
-    <table class="stitch-table">
+    <table class="stitch-table" id="products-table">
         <thead>
             <tr>
                 <th>Code</th>
                 <th>SKU</th>
+                <th>Barcode</th>
                 <th>Name</th>
                 <th>Category</th>
                 <th>Supplier</th>
@@ -25,9 +29,11 @@
         </thead>
         <tbody>
             {% for product in products %}
-            <tr>
+            <tr class="product-row" 
+                data-search="{{ product.name|lower }} {{ product.product_code|lower }} {{ product.sku|default:''|lower }} {{ product.barcode|default:''|lower }}">
                 <td style="font-size: 11px; color: var(--stitch-on-surface-variant);">{{ product.product_code }}</td>
                 <td>{{ product.sku|default:"—" }}</td>
+                <td style="font-family: monospace; font-size: 12px;">{{ product.barcode|default:"—" }}</td>
                 <td class="fw-bold">{{ product.name }}</td>
                 <td>
                     <span class="stitch-badge stitch-badge-outline">{{ product.category }}</span>
@@ -50,4 +56,20 @@
         </tbody>
     </table>
 </div>
+
+<script>
+document.getElementById('product-list-search').addEventListener('input', function() {
+    const term = this.value.toLowerCase().trim();
+    const rows = document.querySelectorAll('.product-row');
+
+    rows.forEach(row => {
+        const searchData = row.dataset.search;
+        if (searchData.includes(term)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
 {% endblock %}

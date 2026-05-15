@@ -1,92 +1,85 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gold Shop — {% block title %}{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'prototype/css/stitch.css' %}">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-warning">
-        <div class="container">
-            <a class="navbar-brand text-dark fw-bold" href="{% url 'dashboard' %}">
-                🥇 Gold Shop
-            </a>
-
-            <button class="navbar-toggler" type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <div class="navbar-nav me-auto">
-
-                    {# Visible to everyone #}
-                    <a class="nav-link text-dark" href="{% url 'dashboard' %}">🏠 Dashboard</a>
-                    <a class="nav-link text-dark" href="{% url 'sale_list' %}">🧾 Sales</a>
-                    <a class="nav-link text-dark" href="{% url 'sale_create' %}">➕ New Sale</a>
-
-                    {# Admin only #}
-                    {% if request.user.is_authenticated and request.user.profile.is_admin %}
-                        <a class="nav-link text-dark" href="{% url 'product_list' %}">💍 Products</a>
-                        <a class="nav-link text-dark" href="{% url 'customer_list' %}">Customers</a>
-                        <a class="nav-link text-dark" href="{% url 'supplier_list' %}">Suppliers</a>
-                        <a class="nav-link text-dark" href="{% url 'category_list' %}">🗂️ Categories</a>
-                        <a class="nav-link text-dark" href="{% url 'inventory_list' %}">📦 Inventory</a>
-                        <a class="nav-link text-dark" href="{% url 'purchase_list' %}">📥 Purchases</a>
-                        <a class="nav-link text-dark" href="{% url 'expense_list' %}">Expenses</a>
-                        <a class="nav-link text-dark" href="{% url 'reports_home' %}">📊 Reports</a>
-                        <a class="nav-link text-dark" href="/admin">⚙️ Admin Panel</a>
-                    {% endif %}
-
-                </div>
-
-                <div class="navbar-nav ms-auto">
-                    {% if request.user.is_authenticated %}
-                        <div class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark fw-bold"
-                               href="#" role="button"
-                               data-bs-toggle="dropdown">
-                                👤 {{ request.user.username }}
-                                <span class="badge bg-dark ms-1">
-                                    {{ request.user.profile.role }}
-                                </span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <span class="dropdown-item-text text-muted small">
-                                        Signed in as <strong>{{ request.user.username }}</strong>
-                                    </span>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="{% url 'logout' %}">
-                                        🚪 Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    {% else %}
-                        <a class="nav-link text-dark" href="{% url 'login' %}">🔑 Login</a>
-                    {% endif %}
-                </div>
+    <div class="stitch-main-layout">
+        <aside class="stitch-sidebar">
+            <div class="stitch-sidebar-brand">
+                <a class="stitch-navbar-brand" href="{% url 'dashboard' %}">
+                    🥇 Gold Shop
+                </a>
             </div>
-        </div>
-    </nav>
+            
+            <div class="stitch-sidebar-content">
+                <a class="stitch-nav-link" href="{% url 'dashboard' %}" id="nav-dashboard">🏠 Dashboard</a>
+                <a class="stitch-nav-link" href="{% url 'sale_list' %}" id="nav-sales">🧾 Sales</a>
+                <a class="stitch-nav-link" href="{% url 'customer_list' %}" id="nav-customers">👤 Customers</a>
+                
+                {% if request.user.is_authenticated and request.user.profile.is_admin %}
+                    <div style="margin-top: 32px; margin-bottom: 12px; padding: 0 16px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stitch-on-surface-variant); font-weight: 700; opacity: 0.6;">Inventory Management</div>
+                    <a class="stitch-nav-link" href="{% url 'product_list' %}" id="nav-products">💎 Products</a>
+                    <a class="stitch-nav-link" href="{% url 'category_list' %}" id="nav-categories">📁 Categories</a>
+                    <a class="stitch-nav-link" href="{% url 'inventory_list' %}" id="nav-inventory">📦 Inventory Vault</a>
+                    <a class="stitch-nav-link" href="{% url 'purchase_list' %}" id="nav-purchases">📥 Purchases</a>
+                    <a class="stitch-nav-link" href="{% url 'supplier_list' %}" id="nav-suppliers">🚚 Suppliers</a>
+                    
+                    <div style="margin-top: 32px; margin-bottom: 12px; padding: 0 16px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stitch-on-surface-variant); font-weight: 700; opacity: 0.6;">Financials & Reports</div>
+                    <a class="stitch-nav-link" href="{% url 'expense_list' %}" id="nav-expenses">📉 Expenses</a>
+                    <a class="stitch-nav-link" href="{% url 'reports_home' %}" id="nav-reports">📊 Intelligence Hub</a>
+                    <a class="stitch-nav-link" href="/admin/" target="_blank" style="color: var(--stitch-primary); font-weight: bold; margin-top: 16px;">⚙️ Admin Panel</a>
+                {% endif %}
+            </div>
 
-    <div class="container mt-4">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-        {% block content %}{% endblock %}
+            <div class="stitch-sidebar-footer">
+                {% if request.user.is_authenticated %}
+                    <div class="d-flex flex-column gap-2" style="padding: 0 8px;">
+                        <div class="stitch-badge stitch-badge-gold" style="text-align: center; padding: 8px;">{{ request.user.username }}</div>
+                        <a class="stitch-nav-link" href="{% url 'logout' %}" style="color: var(--stitch-error); background: rgba(211, 47, 47, 0.05); justify-content: center;">Logout</a>
+                    </div>
+                {% else %}
+                    <a class="stitch-nav-link" href="{% url 'login' %}" style="justify-content: center;">🔑 Secure Login</a>
+                {% endif %}
+            </div>
+        </aside>
+
+        <main class="stitch-main-content">
+            <div class="stitch-container">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="stitch-card" style="padding: 16px 24px; margin-bottom: 32px; border-color: {% if message.tags == 'success' %}var(--stitch-success){% else %}var(--stitch-error){% endif %}; background: {% if message.tags == 'success' %}rgba(46, 125, 50, 0.05){% else %}rgba(211, 47, 47, 0.05){% endif %}; color: {% if message.tags == 'success' %}var(--stitch-success){% else %}var(--stitch-error){% endif %};">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% block content %}{% endblock %}
+                
+                <footer style="margin-top: 120px; padding: 40px 0; border-top: 1px solid var(--stitch-outline); text-align: center;">
+                    <p class="text-muted" style="font-size: 11px; letter-spacing: 0.05em;">© 2026 LUXE GOLD MANAGEMENT SYSTEM — DESIGNED BY STITCH</p>
+                </footer>
+            </div>
+        </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Active link highlighting
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.stitch-nav-link');
+            
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href !== '#' && currentPath === href) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

@@ -3,73 +3,79 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between mb-4">
-    <h2>🧾 Sales History</h2>
-    <a href="{% url 'sale_create' %}" class="btn btn-warning">+ New Sale</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="margin: 0;">🧾 Sales History</h2>
+    <a href="{% url 'sale_create' %}" class="stitch-btn stitch-btn-primary">+ New Sale</a>
 </div>
 
 {% if branches %}
-<form method="get" class="card p-3 mb-4 bg-light">
-    <div class="row g-2 align-items-end">
-        <div class="col-md-4">
-            <label class="form-label">Filter by Branch</label>
-            <select name="branch" class="form-select">
-                <option value="">All Branches</option>
-                {% for b in branches %}
-                <option value="{{ b.id }}"
-                    {% if selected_branch == b.id|stringformat:"s" %}selected{% endif %}>
-                    {{ b.name }}
-                </option>
-                {% endfor %}
-            </select>
+<div class="stitch-card" style="padding: 16px;">
+    <form method="get">
+        <div class="d-flex align-items-center gap-2" style="flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <label class="stitch-label">Filter by Branch</label>
+                <select name="branch" class="stitch-select">
+                    <option value="">All Branches</option>
+                    {% for b in branches %}
+                    <option value="{{ b.id }}"
+                        {% if selected_branch == b.id|stringformat:"s" %}selected{% endif %}>
+                        {{ b.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin-top: 20px;">
+                <button type="submit" class="stitch-btn stitch-btn-secondary">Filter Results</button>
+            </div>
         </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-warning w-100">Filter</button>
-        </div>
-    </div>
-</form>
+    </form>
+</div>
 {% endif %}
 
-<table class="table table-hover">
-    <thead class="table-warning">
-        <tr>
-            <th>#</th>
-            <th>Customer</th>
-            <th>Branch</th>
-            <th>Gold Price</th>
-            <th>Total</th>
-            <th>Profit</th>
-            <th></th>
-            <th>Date</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for sale in sales %}
-        <tr>
-            <td>{{ sale.id }}</td>
-            <td>{{ sale.customer|default:sale.customer_name|default:"—" }}</td>
-            <td>
-                <span class="badge bg-info">
-                    {{ sale.branch.name|default:"—" }}
-                </span>
-            </td>
-            <td>{{ sale.gold_price_at_sale }}</td>
-            <td class="fw-bold">{{ sale.get_total }}</td>
-            <td class="text-success">{{ sale.get_total_profit }}</td>
-            <td>
-                <a href="{% url 'sale_receipt' sale.id %}" class="btn btn-sm btn-outline-warning">Receipt</a>
-                {% if request.user.profile.is_admin %}
-                    <a href="{% url 'sale_return_create' sale.id %}" class="btn btn-sm btn-outline-danger">Return</a>
-                {% endif %}
-            </td>
-            <td>{{ sale.created_at|date:"Y-m-d H:i" }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="8" class="text-center text-muted">No sales found.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="stitch-table-container">
+    <table class="stitch-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Customer</th>
+                <th>Branch</th>
+                <th>Gold Price</th>
+                <th>Total</th>
+                <th>Profit</th>
+                <th>Actions</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales %}
+            <tr>
+                <td style="font-size: 11px; color: var(--stitch-on-surface-variant);">{{ sale.id }}</td>
+                <td class="fw-bold">{{ sale.customer|default:sale.customer_name|default:"—" }}</td>
+                <td>
+                    <span class="stitch-badge stitch-badge-outline">
+                        {{ sale.branch.name|default:"—" }}
+                    </span>
+                </td>
+                <td class="text-gold">{{ sale.gold_price_at_sale }}</td>
+                <td class="fw-bold" style="font-size: 16px;">{{ sale.get_total }}</td>
+                <td style="color: var(--stitch-success);">+{{ sale.get_total_profit }}</td>
+                <td>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'sale_receipt' sale.id %}" class="stitch-btn stitch-btn-secondary" style="font-size: 10px; padding: 4px 10px;">Receipt</a>
+                        {% if request.user.profile.is_admin %}
+                            <a href="{% url 'sale_return_create' sale.id %}" class="stitch-btn stitch-btn-danger" style="font-size: 10px; padding: 4px 10px;">Return</a>
+                        {% endif %}
+                    </div>
+                </td>
+                <td style="font-size: 12px; color: var(--stitch-on-surface-variant);">{{ sale.created_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 40px;" class="text-muted">No sales records found in vault.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 {% endblock %}

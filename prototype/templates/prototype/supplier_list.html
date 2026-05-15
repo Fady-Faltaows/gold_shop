@@ -1,61 +1,75 @@
 {% extends 'prototype/base.html' %}
-{% block title %}Suppliers{% endblock %}
+{% block title %}Suppliers — Gold Vault{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between mb-4">
-    <h2>Suppliers</h2>
-    <a href="{% url 'supplier_create' %}" class="btn btn-warning">+ New Supplier</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="margin: 0;">🤝 Supplier Network</h2>
+    <a href="{% url 'supplier_create' %}" class="stitch-btn stitch-btn-primary">+ New Supplier</a>
 </div>
 
-<form method="get" class="mb-4">
-    <div class="row g-2">
-        <div class="col-md-6">
-            <input type="search" name="q" value="{{ query }}" class="form-control"
-                   placeholder="Search by name, code, contact, phone, or email">
+<div class="stitch-card mb-4">
+    <form method="get">
+        <div class="d-flex align-items-end gap-2">
+            <div style="flex: 1;">
+                <label class="stitch-label">Search Directory</label>
+                <input type="search" name="q" value="{{ query }}" class="stitch-input"
+                       placeholder="Code, Name, Contact, or Email...">
+            </div>
+            <div>
+                <button type="submit" class="stitch-btn stitch-btn-secondary">Search</button>
+            </div>
         </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-warning w-100">Search</button>
-        </div>
-    </div>
-</form>
+    </form>
+</div>
 
-<table class="table table-hover">
-    <thead class="table-warning">
-        <tr>
-            <th>Code</th>
-            <th>Name</th>
-            <th>Contact</th>
-            <th>Phone</th>
-            <th>Email</th>
-            <th>Active</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for supplier in suppliers %}
-        <tr>
-            <td>{{ supplier.supplier_code }}</td>
-            <td>{{ supplier.name }}</td>
-            <td>{{ supplier.contact_person|default:"—" }}</td>
-            <td>{{ supplier.phone|default:"—" }}</td>
-            <td>{{ supplier.email|default:"—" }}</td>
-            <td>{% if supplier.is_active %}Yes{% else %}No{% endif %}</td>
-            <td class="text-end">
-                <a href="{% url 'supplier_purchase_history' supplier.id %}"
-                   class="btn btn-sm btn-outline-warning">Purchases</a>
-                <form method="post" action="{% url 'supplier_delete' supplier.id %}"
-                      class="d-inline"
-                      onsubmit="return confirm('Remove this supplier?');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
-                </form>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="7" class="text-center text-muted">No suppliers found.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="stitch-table-container">
+    <table class="stitch-table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Contact Person</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supplier in suppliers %}
+            <tr>
+                <td style="font-size: 11px; color: var(--stitch-on-surface-variant);">{{ supplier.supplier_code }}</td>
+                <td class="fw-bold">{{ supplier.name }}</td>
+                <td>{{ supplier.contact_person|default:"—" }}</td>
+                <td>{{ supplier.phone|default:"—" }}</td>
+                <td>{{ supplier.email|default:"—" }}</td>
+                <td>
+                    {% if supplier.is_active %}
+                        <span class="stitch-badge" style="background: var(--stitch-success); color: #fff;">Active</span>
+                    {% else %}
+                        <span class="stitch-badge" style="background: var(--stitch-outline); color: var(--stitch-on-surface-variant);">Inactive</span>
+                    {% endif %}
+                </td>
+                <td style="text-align: right;">
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="{% url 'supplier_purchase_history' supplier.id %}" class="stitch-btn stitch-btn-secondary" style="font-size: 10px; padding: 4px 10px; border-color: var(--stitch-primary); color: var(--stitch-primary);">
+                            Purchases
+                        </a>
+                        <form method="post" action="{% url 'supplier_delete' supplier.id %}" class="d-inline" onsubmit="return confirm('Archive this supplier?');">
+                            {% csrf_token %}
+                            <button type="submit" class="stitch-btn stitch-btn-danger" style="font-size: 10px; padding: 4px 10px;">Archive</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 40px;" class="text-muted">
+                    No suppliers found in the network.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

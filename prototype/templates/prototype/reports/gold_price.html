@@ -1,112 +1,106 @@
 {% extends 'prototype/base.html' %}
-{% block title %}Gold Price Report{% endblock %}
+{% block title %}Market Intelligence — Gold Vault{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>📈 Gold Price Dashboard</h2>
-    <a href="{% url 'reports_home' %}" class="btn btn-secondary">← Back to Reports</a>
+    <h2 style="margin: 0;">📈 Market Intelligence</h2>
+    <a href="{% url 'reports_home' %}" class="stitch-btn stitch-btn-secondary">← Back to Hub</a>
 </div>
 
-{# Summary Cards #}
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card border-warning text-center h-100">
-            <div class="card-body">
-                <h6 class="text-muted">Current Price / gram</h6>
-                <h2 class="text-warning fw-bold">
-                    {{ latest_gold.price_per_gram|default:"Not set" }}
-                </h2>
-                <small class="text-muted">
-                    {% if latest_gold %}
-                        Updated: {{ latest_gold.updated_at|date:"Y-m-d H:i" }}
-                    {% endif %}
-                </small>
-            </div>
+{# Summary Metrics #}
+<div class="d-flex gap-4 mb-4" style="flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 300px;">
+        <div class="stitch-card text-center" style="border-color: var(--stitch-primary); background: rgba(179, 142, 16, 0.05);">
+            <h6 class="text-muted" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;">Current Valuation / gram</h6>
+            <h1 style="font-size: 48px; margin: 10px 0; color: var(--stitch-primary);">
+                {{ latest_gold.price_per_gram|default:"Not set" }}
+            </h1>
+            <small class="text-muted" style="font-size: 10px;">
+                {% if latest_gold %}
+                    LAST SYNC: {{ latest_gold.updated_at|date:"Y-m-d H:i" }}
+                {% endif %}
+            </small>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-center h-100 border-danger">
-            <div class="card-body">
-                <h6 class="text-muted">Highest Price</h6>
-                <h2 class="text-danger fw-bold">
-                    {{ highest.price_per_gram|default:"—" }}
-                </h2>
-                <small class="text-muted">
-                    {{ highest.updated_at|date:"Y-m-d"|default:"" }}
-                </small>
-            </div>
+    <div style="flex: 1; min-width: 250px;">
+        <div class="stitch-card text-center">
+            <h6 class="text-muted" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;">Peak Valuation</h6>
+            <h2 style="font-size: 32px; margin: 10px 0; color: var(--stitch-error);">
+                {{ highest.price_per_gram|default:"—" }}
+            </h2>
+            <small class="text-muted" style="font-size: 10px;">
+                {{ highest.updated_at|date:"d M Y"|default:"" }}
+            </small>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-center h-100 border-success">
-            <div class="card-body">
-                <h6 class="text-muted">Lowest Price</h6>
-                <h2 class="text-success fw-bold">
-                    {{ lowest.price_per_gram|default:"—" }}
-                </h2>
-                <small class="text-muted">
-                    {{ lowest.updated_at|date:"Y-m-d"|default:"" }}
-                </small>
-            </div>
+    <div style="flex: 1; min-width: 250px;">
+        <div class="stitch-card text-center">
+            <h6 class="text-muted" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;">Floor Valuation</h6>
+            <h2 style="font-size: 32px; margin: 10px 0; color: var(--stitch-success);">
+                {{ lowest.price_per_gram|default:"—" }}
+            </h2>
+            <small class="text-muted" style="font-size: 10px;">
+                {{ lowest.updated_at|date:"d M Y"|default:"" }}
+            </small>
         </div>
     </div>
 </div>
 
 {# Chart #}
 {% if chart_labels %}
-<div class="card mb-4">
-    <div class="card-header bg-warning text-dark fw-bold">
-        📊 Price History (Last 30 Records)
+<div class="stitch-card mb-4" style="padding: 24px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 style="margin: 0; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase;">📊 Historical Performance (Last 30 Records)</h5>
     </div>
-    <div class="card-body">
-        <canvas id="goldChart" height="100"></canvas>
+    <div style="position: relative; height: 300px; width: 100%;">
+        <canvas id="goldChart"></canvas>
     </div>
 </div>
 {% endif %}
 
 {# History Table #}
-<div class="card">
-    <div class="card-header bg-warning text-dark fw-bold">
-        🕐 Price History Log
+<div class="stitch-card" style="padding: 0;">
+    <div class="stitch-card-header" style="border-bottom: 1px solid var(--stitch-outline); padding: 20px;">
+        <span>🕐 Audit Trail: Price Fluctuations</span>
     </div>
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead class="table-light">
+    <div class="stitch-table-container">
+        <table class="stitch-table">
+            <thead>
                 <tr>
                     <th>#</th>
-                    <th>Price per gram</th>
-                    <th>Date & Time</th>
-                    <th>Change</th>
+                    <th>Price per Gram</th>
+                    <th>Timestamp</th>
+                    <th style="text-align: right;">Market Shift</th>
                 </tr>
             </thead>
             <tbody>
                 {% for gp in gold_prices %}
                 <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td class="fw-bold text-warning">{{ gp.price_per_gram }}</td>
-                    <td>{{ gp.updated_at|date:"Y-m-d H:i" }}</td>
-                    <td>
+                    <td style="font-size: 11px; color: var(--stitch-on-surface-variant);">{{ forloop.counter }}</td>
+                    <td class="fw-bold text-gold" style="font-size: 16px;">{{ gp.price_per_gram }}</td>
+                    <td style="font-size: 13px;">{{ gp.updated_at|date:"Y-m-d H:i" }}</td>
+                    <td style="text-align: right;">
                         {% if not forloop.last %}
                             {% with next=gold_prices|slice:forloop.counter %}
                                 {% for n in next|slice:":1" %}
                                     {% if gp.price_per_gram > n.price_per_gram %}
-                                        <span class="text-success">▲ Up</span>
+                                        <span style="color: var(--stitch-success); font-size: 12px; font-weight: 700;">▲ Bullish</span>
                                     {% elif gp.price_per_gram < n.price_per_gram %}
-                                        <span class="text-danger">▼ Down</span>
+                                        <span style="color: var(--stitch-error); font-size: 12px; font-weight: 700;">▼ Bearish</span>
                                     {% else %}
-                                        <span class="text-muted">— Same</span>
+                                        <span class="text-muted" style="font-size: 12px;">— Neutral</span>
                                     {% endif %}
                                 {% endfor %}
                             {% endwith %}
                         {% else %}
-                            <span class="badge bg-warning text-dark">Latest</span>
+                            <span class="stitch-badge stitch-badge-gold">Live Benchmark</span>
                         {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center text-muted py-3">
-                        No gold price records yet.
+                    <td colspan="4" style="text-align: center; padding: 40px;" class="text-muted">
+                        No market data available for historical analysis.
                     </td>
                 </tr>
                 {% endfor %}
@@ -119,48 +113,68 @@
 {% if chart_labels %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('goldChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {{ chart_labels|safe }},
-            datasets: [{
-                label: 'Gold Price per gram',
-                data: {{ chart_values|safe }},
-                borderColor: '#ffc107',
-                backgroundColor: 'rgba(255, 193, 7, 0.1)',
-                borderWidth: 2,
-                pointBackgroundColor: '#ffc107',
-                pointRadius: 4,
-                tension: 0.3,
-                fill: true,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => `Price: ${ctx.parsed.y}`
-                    }
-                }
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('goldChart').getContext('2d');
+        
+        // Gradient for the chart
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(179, 142, 16, 0.2)');
+        gradient.addColorStop(1, 'rgba(179, 142, 16, 0.0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels|safe }},
+                datasets: [{
+                    label: 'Gold Price',
+                    data: {{ chart_values|safe }},
+                    borderColor: '#B38E10',
+                    backgroundColor: gradient,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#B38E10',
+                    pointBorderColor: '#FFFFFF',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    tension: 0.4,
+                    fill: true,
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    ticks: {
-                        callback: value => value
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#FFFFFF',
+                        titleColor: '#1A1A1A',
+                        bodyColor: '#1A1A1A',
+                        borderColor: '#DED6C4',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: false,
+                        callbacks: {
+                            label: context => `Price: ${context.parsed.y} / gram`
+                        }
                     }
                 },
-                x: {
-                    ticks: {
-                        maxRotation: 45,
-                        minRotation: 45
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(107, 96, 74, 0.1)' },
+                        ticks: { color: 'rgba(107, 96, 74, 0.8)', font: { size: 10 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { 
+                            color: 'rgba(107, 96, 74, 0.8)', 
+                            font: { size: 10 },
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
                     }
                 }
             }
-        }
+        });
     });
 </script>
 {% endif %}

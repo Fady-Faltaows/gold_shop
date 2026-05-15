@@ -1,58 +1,106 @@
 {% extends 'prototype/base.html' %}
-{% block title %}Financial Report{% endblock %}
+{% block title %}Financial Audit — Gold Vault{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Financial Report</h2>
+    <h2 style="margin: 0;">💼 Financial Audit</h2>
     <div class="d-flex gap-2">
-        <a href="{% url 'export_financial_csv' %}" class="btn btn-outline-warning">Export CSV</a>
-        <a href="{% url 'reports_home' %}" class="btn btn-secondary">Back</a>
+        <a href="{% url 'export_financial_csv' %}" class="stitch-btn stitch-btn-secondary">Export Data (CSV)</a>
+        <a href="{% url 'reports_home' %}" class="stitch-btn stitch-btn-secondary">← Back to Hub</a>
     </div>
 </div>
 
-<form method="get" class="card p-3 mb-4 bg-light">
-    <div class="row g-2 align-items-end">
-        <div class="col-md-3">
-            <label class="form-label">Branch</label>
-            <select name="branch" class="form-select">
-                <option value="">All Branches</option>
-                {% for b in branches %}
-                <option value="{{ b.id }}" {% if selected_branch == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
-                {% endfor %}
-            </select>
+{# Filter #}
+<div class="stitch-card mb-4">
+    <form method="get">
+        <div class="d-flex align-items-end gap-3" style="flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <label class="stitch-label">Branch Focus</label>
+                <select name="branch" class="stitch-select">
+                    <option value="">All Branches</option>
+                    {% for b in branches %}
+                    <option value="{{ b.id }}" {% if selected_branch == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label class="stitch-label">From Date</label>
+                <input type="date" name="date_from" class="stitch-input" value="{{ date_from }}">
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label class="stitch-label">To Date</label>
+                <input type="date" name="date_to" class="stitch-input" value="{{ date_to }}">
+            </div>
+            <div>
+                <button type="submit" class="stitch-btn stitch-btn-primary">Generate Audit</button>
+            </div>
         </div>
-        <div class="col-md-3">
-            <label class="form-label">From</label>
-            <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">To</label>
-            <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
-        </div>
-        <div class="col-md-3">
-            <button type="submit" class="btn btn-warning w-100">Filter</button>
-        </div>
-    </div>
-</form>
-
-<div class="row g-3 mb-4">
-    <div class="col-md-3"><div class="card text-center"><div class="card-body"><h6>Cash In</h6><h3>{{ cash_in }}</h3></div></div></div>
-    <div class="col-md-3"><div class="card text-center"><div class="card-body"><h6>Cash Out</h6><h3>{{ cash_out }}</h3></div></div></div>
-    <div class="col-md-3"><div class="card text-center border-warning"><div class="card-body"><h6>Net Cash Flow</h6><h3>{{ net_cash_flow }}</h3></div></div></div>
-    <div class="col-md-3"><div class="card text-center border-success"><div class="card-body"><h6>Net Profit</h6><h3 class="text-success">{{ net_profit }}</h3></div></div></div>
+    </form>
 </div>
 
-<div class="card mb-4">
-    <div class="card-header bg-warning text-dark fw-bold">Breakdown</div>
-    <div class="card-body p-0">
-        <table class="table mb-0">
+{# Financial Summary Metrics #}
+<div class="d-flex gap-4 mb-4" style="flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 200px;">
+        <div class="stitch-card text-center">
+            <h6 class="text-muted" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;">Cash Inflow</h6>
+            <h1 style="font-size: 28px; margin: 10px 0; color: var(--stitch-success);">{{ cash_in }}</h1>
+        </div>
+    </div>
+    <div style="flex: 1; min-width: 200px;">
+        <div class="stitch-card text-center">
+            <h6 class="text-muted" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;">Cash Outflow</h6>
+            <h1 style="font-size: 28px; margin: 10px 0; color: var(--stitch-error);">{{ cash_out }}</h1>
+        </div>
+    </div>
+    <div style="flex: 1; min-width: 200px;">
+        <div class="stitch-card text-center" style="border-color: var(--stitch-primary);">
+            <h6 class="text-muted" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;">Net Cash Flow</h6>
+            <h1 style="font-size: 28px; margin: 10px 0;">{{ net_cash_flow }}</h1>
+        </div>
+    </div>
+    <div style="flex: 1; min-width: 200px;">
+        <div class="stitch-card text-center" style="border-color: var(--stitch-success); background: rgba(46, 125, 50, 0.05);">
+            <h6 class="text-muted" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stitch-success);">Net Profit</h6>
+            <h1 style="font-size: 28px; margin: 10px 0; color: var(--stitch-success);">{{ net_profit }}</h1>
+        </div>
+    </div>
+</div>
+
+{# Detailed Financial Breakdown #}
+<div class="stitch-card" style="padding: 0; max-width: 800px; margin: 0 auto;">
+    <div class="stitch-card-header" style="border-bottom: 1px solid var(--stitch-outline); padding: 20px;">
+        <span>📜 Transaction Category Breakdown</span>
+    </div>
+    <div class="stitch-table-container">
+        <table class="stitch-table">
             <tbody>
-                <tr><th>Sales Revenue</th><td>{{ total_revenue }}</td></tr>
-                <tr><th>Gross Profit</th><td>{{ gross_profit }}</td></tr>
-                <tr><th>Purchase Outflow</th><td>{{ purchase_outflow }}</td></tr>
-                <tr><th>Expense Outflow</th><td>{{ expense_outflow }}</td></tr>
-                <tr><th>Refund Outflow</th><td>{{ refund_outflow }}</td></tr>
+                <tr>
+                    <td class="text-muted">Sales Revenue</td>
+                    <td style="text-align: right;" class="fw-bold">{{ total_revenue }}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Gross Profit</td>
+                    <td style="text-align: right;" class="fw-bold text-gold">{{ gross_profit }}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Purchase Outflow</td>
+                    <td style="text-align: right; color: var(--stitch-error);">{{ purchase_outflow }}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Expense Outflow</td>
+                    <td style="text-align: right; color: var(--stitch-error);">{{ expense_outflow }}</td>
+                </tr>
+                <tr style="border-bottom: none;">
+                    <td class="text-muted">Refund Outflow</td>
+                    <td style="text-align: right; color: var(--stitch-error);">{{ refund_outflow }}</td>
+                </tr>
             </tbody>
+            <tfoot>
+                <tr style="border-top: 2px solid var(--stitch-outline); background: var(--stitch-surface-container);">
+                    <td class="fw-bold">Consolidated Net Profit</td>
+                    <td style="text-align: right; color: var(--stitch-success); font-size: 20px;" class="fw-bold">{{ net_profit }}</td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>

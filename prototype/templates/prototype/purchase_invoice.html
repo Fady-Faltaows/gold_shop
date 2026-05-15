@@ -1,60 +1,102 @@
 {% extends 'prototype/base.html' %}
-{% block title %}Purchase Invoice #{{ purchase.id }}{% endblock %}
+{% block title %}Purchase Invoice — #{{ purchase.id }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between mb-4 print-hide">
-    <h2>Purchase Invoice #{{ purchase.id }}</h2>
+<div class="d-flex justify-content-between align-items-center mb-4 print-hide">
+    <h2 style="margin: 0;">📜 Purchase Documentation</h2>
     <div class="d-flex gap-2">
-        <button onclick="window.print()" class="btn btn-warning">Print / Save PDF</button>
-        <a href="{% url 'purchase_list' %}" class="btn btn-secondary">Back</a>
+        <button onclick="window.print()" class="stitch-btn stitch-btn-primary">Print / Export PDF</button>
+        <a href="{% url 'purchase_list' %}" class="stitch-btn stitch-btn-secondary">Back to history</a>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <div class="d-flex justify-content-between mb-4">
-            <div>
-                <h3>Gold Shop</h3>
-                <div class="text-muted">{{ purchase.branch.name|default:"" }}</div>
-            </div>
-            <div class="text-end">
-                <strong>Invoice #{{ purchase.id }}</strong><br>
-                {{ purchase.created_at|date:"Y-m-d H:i" }}
-            </div>
+<div class="stitch-card receipt-container" style="max-width: 800px; margin: 0 auto; background: var(--stitch-surface);">
+    <div class="receipt-header" style="text-align: center; border-bottom: 2px solid var(--stitch-outline); padding-bottom: 40px; margin-bottom: 40px;">
+        <h1 style="font-size: 48px; margin-bottom: 10px;">📦</h1>
+        <h2 style="margin: 0; letter-spacing: 0.2em; text-transform: uppercase; font-family: var(--stitch-font-display);">Gold Shop</h2>
+        <p class="text-gold" style="font-size: 12px; letter-spacing: 0.1em; margin-top: 5px;">{{ purchase.branch.name|upper|default:"INVENTORY ACQUISITION" }}</p>
+    </div>
+
+    <div class="d-flex justify-content-between mb-5" style="font-size: 14px;">
+        <div>
+            <p class="text-muted" style="text-transform: uppercase; font-size: 10px; margin-bottom: 5px;">Supplier Source</p>
+            <strong style="font-size: 18px;">{{ purchase.supplier|default:purchase.supplier_name|default:"External Vendor" }}</strong>
         </div>
+        <div style="text-align: right;">
+            <p class="text-muted" style="text-transform: uppercase; font-size: 10px; margin-bottom: 5px;">Invoice Reference</p>
+            <strong style="font-size: 18px;">#{{ purchase.id }}</strong><br>
+            <span class="text-muted">{{ purchase.created_at|date:"d F Y — H:i" }}</span>
+        </div>
+    </div>
 
-        <p><strong>Supplier:</strong> {{ purchase.supplier|default:purchase.supplier_name|default:"—" }}</p>
-
-        <table class="table">
-            <thead class="table-light">
+    <div class="stitch-table-container">
+        <table class="stitch-table" style="background: transparent;">
+            <thead>
                 <tr>
-                    <th>Product</th>
-                    <th>Qty</th>
-                    <th>Cost/Piece</th>
-                    <th>Total</th>
+                    <th>Asset Description</th>
+                    <th style="text-align: center;">Qty</th>
+                    <th style="text-align: right;">Cost/Piece</th>
+                    <th style="text-align: right;">Total Outflow</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>{{ purchase.product.product_code }} - {{ purchase.product.name }}</td>
-                    <td>{{ purchase.quantity_purchased }}</td>
-                    <td>{{ purchase.cost_per_piece }}</td>
-                    <td>{{ purchase.get_total_cost }}</td>
+                    <td>
+                        <span style="font-size: 10px; color: var(--stitch-on-surface-variant); display: block;">{{ purchase.product.product_code }}</span>
+                        <span class="fw-bold">{{ purchase.product.name }}</span>
+                        <small class="text-muted d-block" style="font-size: 11px;">Karat: {{ purchase.product.karat }}K | Weight: {{ purchase.product.weight_grams }}g</small>
+                    </td>
+                    <td style="text-align: center;">{{ purchase.quantity_purchased }}</td>
+                    <td style="text-align: right;">{{ purchase.cost_per_piece }}</td>
+                    <td style="text-align: right;" class="fw-bold">{{ purchase.get_total_cost }}</td>
                 </tr>
             </tbody>
+            <tfoot>
+                <tr style="border-top: 1px solid var(--stitch-outline);">
+                    <td colspan="3" style="text-align: right; vertical-align: middle; padding-top: 30px;">
+                        <h3 style="margin: 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em;">Total Acquisition Value</h3>
+                    </td>
+                    <td style="text-align: right; padding-top: 30px;">
+                        <h2 style="margin: 0; color: var(--stitch-primary); font-size: 32px;">{{ purchase.get_total_cost }}</h2>
+                    </td>
+                </tr>
+            </tfoot>
         </table>
+    </div>
+
+    <div class="receipt-footer" style="margin-top: 60px; text-align: center; border-top: 1px solid var(--stitch-outline); padding-top: 30px;">
+        <p class="text-muted" style="font-size: 12px; font-style: italic;">Inventory validated and authorized for branch distribution.</p>
+        <div style="margin-top: 20px;">
+            <span class="text-gold" style="font-size: 10px; border: 1px solid var(--stitch-primary); padding: 4px 12px; letter-spacing: 0.1em; text-transform: uppercase;">Authenticated Acquisition</span>
+        </div>
     </div>
 </div>
 
 <style>
 @media print {
-    .navbar,
-    .print-hide,
-    .alert {
+    body {
+        background: #fff !important;
+        color: #000 !important;
+    }
+    .stitch-navbar, .print-hide {
         display: none !important;
     }
-    .card {
-        border: 0;
+    .receipt-container {
+        border: 1px solid #eee !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        background: #fff !important;
+    }
+    .stitch-table th {
+        background: #f8f8f8 !important;
+        color: #000 !important;
+    }
+    .text-gold, .text-muted, .fw-bold {
+        color: #000 !important;
+    }
+    .stitch-card {
+        border: none !important;
     }
 }
 </style>

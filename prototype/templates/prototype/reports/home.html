@@ -1,61 +1,60 @@
 {% extends 'prototype/base.html' %}
-{% block title %}Reports{% endblock %}
+{% block title %}Analytics Hub — Gold Vault{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">📊 Reports</h2>
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <h2 style="margin: 0;">📊 Intelligence & Analytics</h2>
+    <p class="text-muted" style="margin: 0; font-size: 14px;">REAL-TIME SYSTEM MONITORING</p>
+</div>
 
+<div class="d-flex gap-4" style="flex-wrap: wrap;">
+    {# Sales Report #}
+    <div style="flex: 1; min-width: 250px;">
+        <div class="stitch-card text-center h-100">
+            <div style="font-size: 48px; margin-bottom: 20px;">🧾</div>
+            <h5 style="letter-spacing: 0.1em; text-transform: uppercase;">Sales Intelligence</h5>
+            <p class="text-muted" style="font-size: 12px; margin-bottom: 24px;">Global transaction history and branch performance metrics.</p>
+            <a href="{% url 'report_sales' %}" class="stitch-btn stitch-btn-primary" style="width: 100%;">Access Report</a>
+        </div>
+    </div>
 
+    {# Inventory Report #}
+    <div style="flex: 1; min-width: 250px;">
+        <div class="stitch-card text-center h-100">
+            <div style="font-size: 48px; margin-bottom: 20px;">📦</div>
+            <h5 style="letter-spacing: 0.1em; text-transform: uppercase;">Vault Inventory</h5>
+            <p class="text-muted" style="font-size: 12px; margin-bottom: 24px;">Current stock valuations and low-stock replenishment alerts.</p>
+            <a href="{% url 'report_inventory' %}" class="stitch-btn stitch-btn-primary" style="width: 100%;">Access Report</a>
+        </div>
+    </div>
 
-{# All Reports #}
-<div class="row g-4">
-    <div class="col-md-3">
-        <div class="card h-100 border-warning">
-            <div class="card-body text-center">
-                <h1>🧾</h1>
-                <h5>Sales Report</h5>
-                <p class="text-muted">All branches</p>
-                <a href="{% url 'report_sales' %}" class="btn btn-warning">View</a>
-            </div>
+    {# Profit Report #}
+    <div style="flex: 1; min-width: 250px;">
+        <div class="stitch-card text-center h-100" style="border-color: var(--stitch-success);">
+            <div style="font-size: 48px; margin-bottom: 20px;">💰</div>
+            <h5 style="letter-spacing: 0.1em; text-transform: uppercase;">Profit Analytics</h5>
+            <p class="text-muted" style="font-size: 12px; margin-bottom: 24px;">Net earnings analysis and performance forecasting.</p>
+            <a href="{% url 'report_profit' %}" class="stitch-btn stitch-btn-primary" style="width: 100%; border-color: var(--stitch-success); background: var(--stitch-success); color: #fff;">Access Report</a>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card h-100 border-warning">
-            <div class="card-body text-center">
-                <h1>📦</h1>
-                <h5>Inventory Report</h5>
-                <p class="text-muted">All branches</p>
-                <a href="{% url 'report_inventory' %}" class="btn btn-warning">View</a>
-            </div>
+
+    {# Gold Price #}
+    <div style="flex: 1; min-width: 250px;">
+        <div class="stitch-card text-center h-100" style="border-color: var(--stitch-primary);">
+            <div style="font-size: 48px; margin-bottom: 20px;">📈</div>
+            <h5 style="letter-spacing: 0.1em; text-transform: uppercase;">Market Index</h5>
+            <p class="text-muted" style="font-size: 12px; margin-bottom: 24px;">Historical gold price fluctuations and market trends.</p>
+            <a href="{% url 'report_gold_price' %}" class="stitch-btn stitch-btn-primary" style="width: 100%;">Access Report</a>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card h-100 border-warning">
-            <div class="card-body text-center">
-                <h1>💰</h1>
-                <h5>Profit Report</h5>
-                <p class="text-muted">All branches</p>
-                <a href="{% url 'report_profit' %}" class="btn btn-warning">View</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card h-100 border-warning">
-            <div class="card-body text-center">
-                <h1>📈</h1>
-                <h5>Gold Price</h5>
-                <p class="text-muted">Price history</p>
-                <a href="{% url 'report_gold_price' %}" class="btn btn-warning">View</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card h-100 border-warning">
-            <div class="card-body text-center">
-                <h1>💼</h1>
-                <h5>Financial Report</h5>
-                <p class="text-muted">Cash flow and net profit</p>
-                <a href="{% url 'financial_report' %}" class="btn btn-warning">View</a>
-            </div>
+
+    {# Financial Report #}
+    <div style="flex: 1; min-width: 250px;">
+        <div class="stitch-card text-center h-100">
+            <div style="font-size: 48px; margin-bottom: 20px;">💼</div>
+            <h5 style="letter-spacing: 0.1em; text-transform: uppercase;">Financial Ledger</h5>
+            <p class="text-muted" style="font-size: 12px; margin-bottom: 24px;">Consolidated cash flow and expense auditing.</p>
+            <a href="{% url 'financial_report' %}" class="stitch-btn stitch-btn-primary" style="width: 100%;">Access Report</a>
         </div>
     </div>
 </div>

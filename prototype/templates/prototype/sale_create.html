@@ -1,112 +1,112 @@
 {% extends 'prototype/base.html' %}
 {% load custom_filters %}
-{% block title %}New Sale{% endblock %}
+{% block title %}Draft Transaction — Gold Vault{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between mb-4">
-    <h2>New Sale</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="margin: 0;">📦 Draft Transaction</h2>
     {% if latest_gold %}
-        <span class="badge bg-warning text-dark fs-6 p-2">
-            💰 Gold Price: {{ latest_gold.price_per_gram }} / gram
+        <span class="stitch-badge stitch-badge-gold" style="font-size: 14px; padding: 8px 16px;">
+            💰 Live Benchmark: {{ latest_gold.price_per_gram }} / gram
         </span>
     {% else %}
-        <span class="badge bg-danger fs-6 p-2">⚠️ No gold price set!</span>
+        <span class="stitch-badge" style="background: var(--stitch-error); color: #FFF; font-size: 14px; padding: 8px 16px;">⚠️ Market Rate Unset</span>
     {% endif %}
 </div>
 
-{# Branch Selector — Admin only — GET form منفصل تماماً #}
+{# Branch Selector — Admin only #}
 {% if request.user.profile.is_admin %}
-<div class="card mb-4 border-warning">
-    <div class="card-header bg-warning text-dark fw-bold">
-        🏪 Select Branch
+<div class="stitch-card" style="border-color: var(--stitch-primary); box-shadow: 0 4px 20px rgba(179, 142, 16, 0.05);">
+    <div class="stitch-card-header">
+        <span>🏪 Branch Inventory Access</span>
     </div>
-    <div class="card-body">
-        <form method="get" action="{% url 'sale_create' %}">
-            <div class="row g-2 align-items-end">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Branch</label>
-                    <select name="branch" class="form-select">
-                        <option value="">— Select Branch —</option>
-                        {% for b in branches %}
-                        <option value="{{ b.id }}"
-                            {% if selected_branch.id == b.id %}selected{% endif %}>
-                            {{ b.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-warning fw-bold w-100">
-                        Load Products
-                    </button>
-                </div>
+    <form method="get" action="{% url 'sale_create' %}">
+        <div class="d-flex align-items-end gap-2">
+            <div style="flex: 1;">
+                <label class="stitch-label">Select Source Branch</label>
+                <select name="branch" class="stitch-select">
+                    <option value="">— Select Branch —</option>
+                    {% for b in branches %}
+                    <option value="{{ b.id }}"
+                        {% if selected_branch.id == b.id %}selected{% endif %}>
+                        {{ b.name }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
-        </form>
-        {% if selected_branch %}
-        <div class="mt-2">
-            <span class="badge bg-warning text-dark">
-                🏪 {{ selected_branch.name }}
-            </span>
+            <div>
+                <button type="submit" class="stitch-btn stitch-btn-primary">
+                    Synchronize Inventory
+                </button>
+            </div>
         </div>
-        {% endif %}
+    </form>
+    {% if selected_branch %}
+    <div class="mt-2">
+        <span class="text-gold" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">
+            Active Inventory: {{ selected_branch.name }}
+        </span>
     </div>
+    {% endif %}
 </div>
 {% endif %}
 
 {# لو أدمن ومحددش فرع #}
 {% if request.user.profile.is_admin and not selected_branch %}
-<div class="alert alert-warning">
-    ⚠️ Please select a branch first to load products.
+<div class="stitch-card" style="border-color: var(--stitch-primary); text-align: center; padding: 60px;">
+    <p class="text-gold" style="font-size: 16px; font-weight: 600;">⚠️ Authorization Required: Please select a source branch to initiate transaction.</p>
 </div>
 
 {% else %}
 
-{# Sale Form — POST منفصل #}
+{# Sale Form #}
 <form method="post" action="{% url 'sale_create' %}{% if selected_branch %}?branch={{ selected_branch.id }}{% endif %}">
     {% csrf_token %}
 
-    <div class="card mb-4">
-        <div class="card-header bg-warning text-dark fw-bold">Sale Info</div>
-        <div class="card-body row g-3">
-            <div class="col-md-6">
-                <label class="form-label">
-                    Customer
+    <div class="stitch-card">
+        <div class="stitch-card-header">Client Credentials</div>
+        <div class="d-flex gap-4 mb-4" style="flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 250px;">
+                <label class="stitch-label">
+                    Registered Client
                     <a href="{% url 'customer_create' %}?next={{ request.get_full_path|urlencode }}"
-                       class="btn btn-sm btn-outline-warning ms-2">
-                        + New Customer
+                       class="text-gold" style="font-size: 10px; margin-left: 10px; text-decoration: none; font-weight: 700; text-transform: uppercase;">
+                        + Onboard New
                     </a>
                 </label>
                 {{ sale_form.customer }}
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Customer Name</label>
+            <div style="flex: 1; min-width: 250px;">
+                <label class="stitch-label">Direct Entry Name (If Guest)</label>
                 {{ sale_form.customer_name }}
             </div>
-            <div class="col-md-4">
-                <label class="form-label">Discount</label>
+        </div>
+        <div class="d-flex gap-4" style="flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 150px;">
+                <label class="stitch-label">Discretionary Discount</label>
                 {{ sale_form.discount_amount }}
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Notes</label>
+            <div style="flex: 2; min-width: 250px;">
+                <label class="stitch-label">Transaction Memoranda</label>
                 {{ sale_form.notes }}
             </div>
         </div>
     </div>
 
-    <div class="card mb-4">
-        <div class="card-header bg-warning text-dark fw-bold">Sale Items</div>
-        <div class="card-body">
-            <table class="table" id="items-table">
+    <div class="stitch-card">
+        <div class="stitch-card-header">Asset Manifest</div>
+        <div class="stitch-table-container">
+            <table class="stitch-table" id="items-table">
                 <thead>
                     <tr>
-                        <th>Product</th>
-                        <th>Weight (g)</th>
+                        <th style="width: 30%;">Asset</th>
+                        <th>Weight</th>
                         <th>Karat</th>
                         <th>Purity</th>
-                        <th>Workmanship</th>
-                        <th>Unit Price</th>
-                        <th>Qty</th>
-                        <th>In Stock</th>
+                        <th>Fee</th>
+                        <th>Unit Rate</th>
+                        <th style="text-align: center;">Qty</th>
+                        <th>Stock</th>
                         <th>Subtotal</th>
                         <th></th>
                     </tr>
@@ -114,10 +114,10 @@
                 <tbody id="items-body">
                     <tr class="item-row">
                         <td>
-                            <input type="search" class="form-control form-control-sm product-search mb-2"
-                                   placeholder="Search products">
-                            <select name="product" class="form-select product-select">
-                                <option value="">— Select Product —</option>
+                            <input type="search" class="stitch-input product-search"
+                                   placeholder="Search assets..." style="font-size: 11px; margin-bottom: 8px; padding: 6px 10px; background: var(--stitch-background);">
+                            <select name="product" class="stitch-select product-select" style="font-size: 13px;">
+                                <option value="">— Select —</option>
                                 {% for p in products %}
                                 <option value="{{ p.id }}"
                                     data-weight="{{ p.weight_grams }}"
@@ -125,48 +125,75 @@
                                     data-purity="{{ p.get_purity }}"
                                     data-workmanship="{{ p.workmanship_fee }}"
                                     data-stock="{{ inventory_map|get_item:p.id }}">
-                                    {{ p.product_code }} - {{ p.name }} ({{ p.karat }}K) — Stock: {{ inventory_map|get_item:p.id }}
+                                    {{ p.product_code }} - {{ p.name }} ({{ p.karat }}K)
                                 </option>
                                 {% endfor %}
                             </select>
                         </td>
-                        <td><span class="weight-display">—</span></td>
-                        <td><span class="karat-display">—</span></td>
-                        <td><span class="purity-display">—</span></td>
-                        <td><span class="work-display">—</span></td>
-                        <td><span class="price-display fw-bold text-success">—</span></td>
-                        <td>
+                        <td><span class="weight-display" style="font-size: 13px;">—</span></td>
+                        <td><span class="karat-display" style="font-size: 13px;">—</span></td>
+                        <td><span class="purity-display" style="font-size: 13px;">—</span></td>
+                        <td><span class="work-display" style="font-size: 13px;">—</span></td>
+                        <td><span class="price-display fw-bold text-gold" style="font-size: 14px;">—</span></td>
+                        <td style="text-align: center;">
                             <input type="number" name="quantity"
-                                class="form-control qty-input"
-                                value="1" min="1" style="width:80px">
+                                class="stitch-input qty-input"
+                                value="1" min="1" style="width:60px; text-align: center; padding: 4px;">
                         </td>
-                        <td><span class="stock-display">—</span></td>
-                        <td><span class="subtotal-display fw-bold">—</span></td>
+                        <td><span class="stock-display" style="font-size: 13px;">—</span></td>
+                        <td><span class="subtotal-display fw-bold text-gold" style="font-size: 14px;">—</span></td>
                         <td>
-                            <button type="button" class="btn btn-sm btn-danger remove-row">✕</button>
+                            <button type="button" class="stitch-btn stitch-btn-danger remove-row" style="padding: 6px 10px;">✕</button>
                         </td>
                     </tr>
                 </tbody>
             </table>
-            <button type="button" class="btn btn-outline-warning" id="add-row">
-                + Add Item
-            </button>
         </div>
+        <button type="button" class="stitch-btn stitch-btn-secondary" id="add-row">
+            + Append Asset Row
+        </button>
     </div>
 
-    <div class="card mb-4">
-        <div class="card-body text-end">
-            <h5>Grand Total: <span id="grand-total" class="text-success fw-bold">0.00</span></h5>
-        </div>
+    <div class="stitch-card" style="text-align: right; background: rgba(179, 142, 16, 0.03); border-color: var(--stitch-primary);">
+        <h5 style="margin: 0; color: var(--stitch-on-surface-variant); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;">Valuation Aggregate</h5>
+        <h1 style="margin: 5px 0 0 0; font-size: 56px; color: var(--stitch-on-surface); font-family: var(--stitch-font-headline);">
+            <span id="grand-total">0.00</span>
+        </h1>
     </div>
 
     <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-warning fw-bold px-4">💾 Save Sale</button>
-        <a href="{% url 'sale_list' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="stitch-btn stitch-btn-primary" style="padding: 14px 48px; font-size: 16px;">
+            💾 Commit Transaction — Authenticate
+        </button>
+        <a href="{% url 'sale_list' %}" class="stitch-btn stitch-btn-secondary">Revert Draft</a>
     </div>
 </form>
 
 {% endif %}
+
+<style>
+    /* Styling Django Form Widgets to match Stitch Light */
+    input[type="text"], input[type="number"], select, textarea {
+        width: 100%;
+        background: var(--stitch-surface-container);
+        border: 1px solid var(--stitch-outline);
+        border-radius: var(--stitch-radius);
+        color: var(--stitch-on-surface);
+        padding: 8px 12px;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.3s;
+    }
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--stitch-primary);
+        background: #FFF;
+        box-shadow: 0 0 0 3px rgba(179, 142, 16, 0.1);
+    }
+    .is-invalid {
+        border-color: var(--stitch-error) !important;
+        background-color: rgba(211, 47, 47, 0.05) !important;
+    }
+</style>
 
 <script>
 const goldPrice = {{ gold_price_js }};
@@ -236,7 +263,7 @@ function updateGrandTotal() {
         total += val;
     });
     const discount = parseFloat(document.getElementById('id_discount_amount')?.value) || 0;
-    document.getElementById('grand-total').textContent = Math.max(total - discount, 0).toFixed(2);
+    document.getElementById('grand-total').textContent = Math.max(total - discount, 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 }
 
 function attachRowEvents(row) {

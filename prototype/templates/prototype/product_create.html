@@ -1,75 +1,109 @@
 {% extends 'prototype/base.html' %}
-{% block title %}Add Product{% endblock %}
+{% block title %}Add Product — Gold Vault{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between mb-4">
-    <h2>➕ Add New Product</h2>
-    <a href="{% url 'product_list' %}" class="btn btn-secondary">← Back</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="margin: 0;">➕ Add New Product</h2>
+    <a href="{% url 'product_list' %}" class="stitch-btn stitch-btn-secondary">← Back to vault</a>
 </div>
 
-<div class="card border-warning">
-    <div class="card-header bg-warning text-dark fw-bold">Product Details</div>
-    <div class="card-body">
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label fw-bold">SKU</label>
-                    {{ form.sku }}
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label fw-bold">Barcode</label>
-                    {{ form.barcode }}
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Name</label>
-                    {{ form.name }}
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">
-                        Category
-                        <a href="{% url 'category_create' %}?next=product_create"
-                           class="btn btn-sm btn-outline-warning ms-2">
-                            + New Category
-                        </a>
-                    </label>
-                    {{ form.category }}
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">Karat</label>
-                    {{ form.karat }}
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">Weight (grams)</label>
-                    {{ form.weight_grams }}
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">Workmanship Fee</label>
-                    {{ form.workmanship_fee }}
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">Low Stock Alert</label>
-                    {{ form.low_stock_threshold }}
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Preferred Supplier</label>
-                    {{ form.preferred_supplier }}
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Product Image</label>
+<div class="stitch-card" style="border-color: var(--stitch-primary);">
+    <div class="stitch-card-header">Product Specification</div>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="d-flex gap-4 mb-4" style="flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 150px;">
+                <label class="stitch-label">SKU (Internal Code)</label>
+                {{ form.sku }}
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label class="stitch-label">Barcode Identification</label>
+                {{ form.barcode }}
+            </div>
+            <div style="flex: 2; min-width: 300px;">
+                <label class="stitch-label">Product Name</label>
+                {{ form.name }}
+            </div>
+        </div>
+
+        <div class="d-flex gap-4 mb-4" style="flex-wrap: wrap;">
+            <div style="flex: 2; min-width: 250px;">
+                <label class="stitch-label">
+                    Category Selection
+                    <a href="{% url 'category_create' %}?next=product_create"
+                       class="text-gold" style="font-size: 11px; margin-left: 10px; text-decoration: none; font-weight: 700; text-transform: uppercase;">
+                        + New
+                    </a>
+                </label>
+                {{ form.category }}
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label class="stitch-label">Purity (Karat)</label>
+                {{ form.karat }}
+            </div>
+        </div>
+
+        <div class="d-flex gap-4 mb-4" style="flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 150px;">
+                <label class="stitch-label">Net Weight (grams)</label>
+                {{ form.weight_grams }}
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label class="stitch-label">Workmanship Fee</label>
+                {{ form.workmanship_fee }}
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label class="stitch-label">Low Stock Alert Level</label>
+                {{ form.low_stock_threshold }}
+            </div>
+        </div>
+
+        <div class="d-flex gap-4 mb-4" style="flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 250px;">
+                <label class="stitch-label">Preferred Supplier Source</label>
+                {{ form.preferred_supplier }}
+            </div>
+            <div style="flex: 1; min-width: 250px;">
+                <label class="stitch-label">Asset Image Documentation</label>
+                <div style="padding: 10px; border: 1px dashed var(--stitch-outline); border-radius: 4px; background: var(--stitch-surface-container);">
                     {{ form.image }}
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Notes</label>
-                    {{ form.notes }}
-                </div>
             </div>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-warning fw-bold px-4">
-                    💾 Save Product
-                </button>
-            </div>
-        </form>
-    </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="stitch-label">Internal Audit Notes & History</label>
+            {{ form.notes }}
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="stitch-btn stitch-btn-primary" style="padding: 14px 48px;">
+                💾 Register Asset — Finalize Entry
+            </button>
+        </div>
+    </form>
 </div>
+
+<style>
+    /* Styling Django Form Widgets for Light Mode */
+    input[type="text"], input[type="number"], select, textarea, input[type="file"] {
+        width: 100%;
+        background: var(--stitch-surface-container);
+        border: 1px solid var(--stitch-outline);
+        border-radius: var(--stitch-radius);
+        color: var(--stitch-on-surface);
+        padding: 10px 12px;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.3s;
+    }
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--stitch-primary);
+        background: #FFF;
+        box-shadow: 0 0 0 3px rgba(179, 142, 16, 0.1);
+    }
+    textarea {
+        height: 120px;
+    }
+</style>
 {% endblock %}

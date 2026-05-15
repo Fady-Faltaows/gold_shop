@@ -1,116 +1,132 @@
 {% extends 'prototype/base.html' %}
-{% block title %}New Purchase{% endblock %}
+{% block title %}Acquisition Entry — Gold Vault{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between mb-4">
-    <h2>📥 New Purchase</h2>
-    <a href="{% url 'purchase_list' %}" class="btn btn-secondary">← Back</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="margin: 0;">📥 Asset Acquisition</h2>
+    <a href="{% url 'purchase_list' %}" class="stitch-btn stitch-btn-secondary">← Back to History</a>
 </div>
 
-<div class="card border-warning">
-    <div class="card-header bg-warning text-dark fw-bold">Purchase Details</div>
-    <div class="card-body">
-        <form method="post">
-            {% csrf_token %}
-            <div class="row g-3">
+<div class="stitch-card" style="border-color: var(--stitch-primary);">
+    <div class="stitch-card-header">Acquisition Documentation</div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="d-flex gap-4 mb-4" style="flex-wrap: wrap;">
+            <div style="flex: 2; min-width: 300px;">
+                <label class="stitch-label">
+                    Target Asset
+                    <a href="{% url 'product_create' %}" class="text-gold" style="font-size: 10px; margin-left: 10px; text-decoration: none; font-weight: 700; text-transform: uppercase;" target="_blank">
+                        + Define New
+                    </a>
+                </label>
+                <input type="search" class="stitch-input" id="product-search" placeholder="Search product code or name..." style="margin-bottom: 12px; font-size: 12px; background: var(--stitch-background);">
+                <select name="product" class="stitch-select" id="id_product">
+                    <option value="">— Select Product —</option>
+                    {% for p in products %}
+                    <option value="{{ p.id }}"
+                        data-weight="{{ p.weight_grams }}"
+                        data-karat="{{ p.karat }}"
+                        data-purity="{{ p.get_purity }}">
+                        {{ p.product_code }} - {{ p.name }} ({{ p.karat }}K — {{ p.weight_grams }}g)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label class="stitch-label">Acquisition Quantity</label>
+                {{ form.quantity_purchased }}
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label class="stitch-label">Cost per Unit</label>
+                <input type="text" class="stitch-input" id="cost-display" value="Auto-calculate" readonly style="background: var(--stitch-surface-container); cursor: not-allowed; color: var(--stitch-primary); font-weight: 700;">
+                <small class="text-muted" style="font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase;">Based on Market Formula</small>
+            </div>
+        </div>
 
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">
-                        Product
-                        <a href="{% url 'product_create' %}"
-                           class="btn btn-sm btn-outline-warning ms-2"
-                           target="_blank">
-                            + New Product
-                        </a>
-                    </label>
-                    <input type="search" class="form-control form-control-sm mb-2"
-                           id="product-search" placeholder="Search products">
-                    <select name="product" class="form-select" id="id_product">
-                        <option value="">— Select Product —</option>
-                        {% for p in products %}
-                        <option value="{{ p.id }}"
-                            data-weight="{{ p.weight_grams }}"
-                            data-karat="{{ p.karat }}"
-                            data-purity="{{ p.get_purity }}">
-                            {{ p.product_code }} - {{ p.name }} ({{ p.karat }}K — {{ p.weight_grams }}g)
-                        </option>
-                        {% endfor %}
-                    </select>
+        {# Product info preview #}
+        <div id="product-info" class="stitch-card" style="display:none; background: rgba(179, 142, 16, 0.03); margin-bottom: 24px; border-style: dashed; border-color: var(--stitch-primary);">
+            <div class="d-flex justify-content-around text-center">
+                <div>
+                    <small class="text-muted d-block" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;">Purity Hub</small>
+                    <strong id="info-karat" class="text-gold" style="font-size: 18px;">—</strong>
                 </div>
-
-                <div class="col-md-3">
-                    <label class="form-label fw-bold">Quantity</label>
-                    {{ form.quantity_purchased }}
+                <div>
+                    <small class="text-muted d-block" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;">Purity Index</small>
+                    <strong id="info-purity" style="font-size: 18px;">—</strong>
                 </div>
-
-                <div class="col-md-3">
-                    <label class="form-label fw-bold">Cost per Piece</label>
-                    <input type="text" class="form-control bg-light"
-                        id="cost-display" value="Auto calculated" readonly>
-                    <small class="text-muted">Gold price × purity × weight</small>
+                <div>
+                    <small class="text-muted d-block" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;">Net Weight</small>
+                    <strong id="info-weight" style="font-size: 18px;">—</strong> <span style="font-size: 10px; vertical-align: middle;">g</span>
                 </div>
-
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">
-                        Supplier
-                        <a href="{% url 'supplier_create' %}?next={{ request.get_full_path|urlencode }}"
-                           class="btn btn-sm btn-outline-warning ms-2">
-                            + New Supplier
-                        </a>
-                    </label>
-                    {{ form.supplier }}
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Supplier Name</label>
-                    {{ form.supplier_name }}
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Notes</label>
-                    {{ form.notes }}
+                <div>
+                    <small class="text-muted d-block" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;">Unit Valuation</small>
+                    <strong id="info-cost" style="color: var(--stitch-success); font-size: 20px;">—</strong>
                 </div>
             </div>
+        </div>
 
-            {# Product info preview #}
-            <div id="product-info" class="alert alert-warning mt-3" style="display:none">
-                <div class="row text-center">
-                    <div class="col">
-                        <small class="text-muted d-block">Karat</small>
-                        <strong id="info-karat">—</strong>
-                    </div>
-                    <div class="col">
-                        <small class="text-muted d-block">Purity</small>
-                        <strong id="info-purity">—</strong>
-                    </div>
-                    <div class="col">
-                        <small class="text-muted d-block">Weight</small>
-                        <strong id="info-weight">—</strong> g
-                    </div>
-                    <div class="col">
-                        <small class="text-muted d-block">Cost per Piece</small>
-                        <strong id="info-cost" class="text-success">—</strong>
-                    </div>
-                </div>
+        <div class="d-flex gap-4 mb-4" style="flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 250px;">
+                <label class="stitch-label">
+                    Supply Source
+                    <a href="{% url 'supplier_create' %}?next={{ request.get_full_path|urlencode }}" class="text-gold" style="font-size: 10px; margin-left: 10px; text-decoration: none; font-weight: 700; text-transform: uppercase;">
+                        + Onboard
+                    </a>
+                </label>
+                {{ form.supplier }}
             </div>
-            <div class="col-md-6">
-                <label class="form-label fw-bold">Branch</label>
-                <select name="branch" class="form-select" required>
+            <div style="flex: 1; min-width: 250px;">
+                <label class="stitch-label">Manual Supplier Entry (If unregistered)</label>
+                {{ form.supplier_name }}
+            </div>
+        </div>
+
+        <div class="d-flex gap-4 mb-4" style="flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 250px;">
+                <label class="stitch-label">Allocation Branch</label>
+                <select name="branch" class="stitch-select" required>
                     <option value="">— Select Branch —</option>
                     {% for b in branches %}
                     <option value="{{ b.id }}">{{ b.name }}</option>
                     {% endfor %}
                 </select>
             </div>
-
-            <div class="mt-4">
-                <button type="submit" class="btn btn-warning fw-bold px-4">
-                    💾 Save Purchase
-                </button>
+            <div style="flex: 2; min-width: 250px;">
+                <label class="stitch-label">Acquisition Memoranda</label>
+                {{ form.notes }}
             </div>
-        </form>
-    </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="stitch-btn stitch-btn-primary" style="padding: 14px 48px;">
+                💾 Commit Acquisition — Secure Entry
+            </button>
+        </div>
+    </form>
 </div>
+
+<style>
+    /* Styling Django Form Widgets for Light Mode */
+    input[type="text"], input[type="number"], select, textarea {
+        width: 100%;
+        background: var(--stitch-surface-container);
+        border: 1px solid var(--stitch-outline);
+        border-radius: var(--stitch-radius);
+        color: var(--stitch-on-surface);
+        padding: 10px 12px;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.3s;
+    }
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--stitch-primary);
+        background: #FFF;
+        box-shadow: 0 0 0 3px rgba(179, 142, 16, 0.1);
+    }
+    textarea {
+        height: 80px;
+    }
+</style>
 
 <script>
 const goldPrice = {{ gold_price_js|default:0 }};
@@ -148,7 +164,7 @@ document.getElementById('id_product').addEventListener('change', function() {
         document.getElementById('info-karat').textContent  = karat + 'K';
         document.getElementById('info-purity').textContent = (purity * 100).toFixed(1) + '%';
         document.getElementById('info-weight').textContent = weight.toFixed(3);
-        document.getElementById('info-cost').textContent   = cost.toFixed(2);
+        document.getElementById('info-cost').textContent   = cost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('cost-display').value      = cost.toFixed(2);
         document.getElementById('product-info').style.display = 'block';
     } else {

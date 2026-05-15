@@ -1,77 +1,66 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gold Shop — Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Gold Shop — Authentication Hub</title>
+    <link rel="stylesheet" href="{% static 'prototype/css/stitch.css' %}">
     <style>
         body {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            min-height: 100vh;
             display: flex;
             align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: radial-gradient(circle at center, #FDFCFB 0%, #F8F6F2 100%);
         }
         .login-card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 40px 120px rgba(107, 96, 74, 0.15);
+            padding: 48px !important;
+            background: #FFF !important;
         }
-        .btn-gold {
-            background: #ffc107;
-            color: #1a1a2e;
-            font-weight: bold;
-            border: none;
-        }
-        .btn-gold:hover {
-            background: #ffca2c;
+        .stitch-input {
+            margin-bottom: 24px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-4">
-                <div class="card login-card p-4">
-                    <div class="text-center mb-4">
-                        <h1 class="display-4">🥇</h1>
-                        <h3 class="fw-bold">Gold Shop</h3>
-                        <p class="text-muted">Sign in to continue</p>
-                    </div>
+    <div class="login-card stitch-card">
+        <div style="text-align: center; margin-bottom: 48px;">
+            <div style="font-size: 64px; margin-bottom: 16px;">🥇</div>
+            <h2 style="margin: 0; letter-spacing: 0.2em; text-transform: uppercase; font-family: var(--stitch-font-headline); color: var(--stitch-primary);">Gold Shop</h2>
+            <p class="text-muted" style="font-size: 11px; margin-top: 12px; letter-spacing: 0.1em; font-weight: 600;">PREMIUM MANAGEMENT ECOSYSTEM</p>
+        </div>
 
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Username</label>
-                            <input type="text" name="username"
-                                   class="form-control form-control-lg"
-                                   placeholder="Enter username"
-                                   autofocus required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Password</label>
-                            <input type="password" name="password"
-                                   class="form-control form-control-lg"
-                                   placeholder="Enter password"
-                                   required>
-                        </div>
-                        <button type="submit" class="btn btn-gold w-100 btn-lg">
-                            Login →
-                        </button>
-                    </form>
+        {% if messages %}
+            {% for message in messages %}
+                <div style="text-align: center; margin-bottom: 24px; border-bottom: 1px solid var(--stitch-error); color: var(--stitch-error); padding-bottom: 16px; font-size: 13px;">
+                    {{ message }}
                 </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="stitch-form-group">
+                <label class="stitch-label">Personnel Username</label>
+                <input type="text" name="username" class="stitch-input" placeholder="e.g. admin_01" autofocus required>
             </div>
+            <div class="stitch-form-group">
+                <label class="stitch-label">Security Passphrase</label>
+                <input type="password" name="password" class="stitch-input" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit" class="stitch-btn stitch-btn-primary" style="width: 100%; margin-top: 32px; height: 52px; font-size: 15px;">
+                Authenticate & Unlock Vault
+            </button>
+        </form>
+        
+        <div style="margin-top: 48px; text-align: center; border-top: 1px solid var(--stitch-outline); padding-top: 24px;">
+            <p class="text-muted" style="font-size: 10px; letter-spacing: 0.1em; font-weight: 700;">SECURED SESSION ARCHITECTURE</p>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

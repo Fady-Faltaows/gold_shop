@@ -1,59 +1,82 @@
 {% extends 'prototype/base.html' %}
-{% block title %}Inventory{% endblock %}
+{% block title %}Inventory Vault{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">Inventory</h2>
-<form method="get" class="mb-4">
-    <div class="row g-2 align-items-end">
-        <div class="col-md-4">
-            <label class="form-label">Filter by Branch</label>
-            <select name="branch" class="form-select">
-                <option value="">All Branches</option>
-                {% for b in branches %}
-                <option value="{{ b.id }}"
-                    {% if selected_branch == b.id|stringformat:"s" %}selected{% endif %}>
-                    {{ b.name }}
-                </option>
-                {% endfor %}
-            </select>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="margin: 0;">📦 Inventory Vault</h2>
+</div>
+
+<div class="stitch-card mb-4">
+    <form method="get">
+        <div class="d-flex align-items-end gap-2" style="flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 250px;">
+                <label class="stitch-label">Filter by Branch</label>
+                <select name="branch" class="stitch-select">
+                    <option value="">All Branches</option>
+                    {% for b in branches %}
+                    <option value="{{ b.id }}"
+                        {% if selected_branch == b.id|stringformat:"s" %}selected{% endif %}>
+                        {{ b.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <button type="submit" class="stitch-btn stitch-btn-secondary">Apply Filter</button>
+            </div>
         </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-warning w-100">Filter</button>
-        </div>
-    </div>
-</form>
-<table class="table table-hover">
-    <thead class="table-warning">
-        <tr>
-            <th>Product</th>
-            <th>Category</th>
-            <th>Karat</th>
-            <th>Weight (g)</th>
-            <th>In Stock</th>
-            <th>Status</th>
-            <th>Branch</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in inventory %}
-        <tr>
-            <td>{{ item.product.product_code }} - {{ item.product.name }}</td>
-            <td>{{ item.product.category }}</td>
-            <td>{{ item.product.karat }}K</td>
-            <td>{{ item.product.weight_grams }}</td>
-            <td>{{ item.quantity_pieces }}</td>
-            <td>
-                {% if item.quantity_pieces == 0 %}
-                    <span class="badge bg-danger">Out of Stock</span>
-                {% elif item.quantity_pieces <= 3 %}
-                    <span class="badge bg-warning text-dark">Low Stock</span>
-                {% else %}
-                    <span class="badge bg-success">In Stock</span>
-                {% endif %}
-            </td>
-            <td>{{ item.branch.name }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    </form>
+</div>
+
+<div class="stitch-table-container">
+    <table class="stitch-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Karat</th>
+                <th>Weight (g)</th>
+                <th>In Stock</th>
+                <th>Status</th>
+                <th>Branch</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in inventory %}
+            <tr>
+                <td class="fw-bold">
+                    <span style="font-size: 10px; color: var(--stitch-on-surface-variant); display: block;">{{ item.product.product_code }}</span>
+                    {{ item.product.name }}
+                </td>
+                <td>
+                    <span class="stitch-badge stitch-badge-outline">{{ item.product.category }}</span>
+                </td>
+                <td class="text-gold">{{ item.product.karat }}K</td>
+                <td>{{ item.product.weight_grams }}</td>
+                <td class="fw-bold" style="font-size: 16px;">{{ item.quantity_pieces }}</td>
+                <td>
+                    {% if item.quantity_pieces == 0 %}
+                        <span class="stitch-badge" style="background: var(--stitch-error); color: #fff;">Out of Stock</span>
+                    {% elif item.quantity_pieces <= 3 %}
+                        <span class="stitch-badge stitch-badge-gold">Low Stock</span>
+                    {% else %}
+                        <span class="stitch-badge" style="background: var(--stitch-success); color: #fff;">Optimal</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="text-muted" style="font-size: 12px; font-weight: 600; text-transform: uppercase;">
+                        {{ item.branch.name }}
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 40px;" class="text-muted">
+                    Inventory is currently empty.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

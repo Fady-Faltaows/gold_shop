@@ -158,7 +158,8 @@ class Inventory(models.Model):
     quantity_pieces = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f"{self.product.name} — {self.branch.name} — {self.quantity_pieces} pcs"
+        branch_name = self.branch.name if self.branch else 'No branch'
+        return f"{self.product.name} — {branch_name} — {self.quantity_pieces} pcs"
 
     class Meta:
         verbose_name_plural = "Inventory"

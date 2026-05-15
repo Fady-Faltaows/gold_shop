@@ -378,6 +378,8 @@ def sale_create(request):
             product_ids = request.POST.getlist('product')
             quantities  = request.POST.getlist('quantity')
             has_error   = False
+            created_items = 0
+            stock_updates = []
 
             for product_id, quantity in zip(product_ids, quantities):
                 if product_id and quantity:
@@ -412,6 +414,8 @@ def sale_create(request):
 
                         inventory.quantity_pieces -= qty
                         inventory.save()
+                        created_items += 1
+                        stock_updates.append((inventory, qty))
 
                     except (Product.DoesNotExist, Inventory.DoesNotExist):
                         messages.error(request, '⚠️ Product not available in this branch.')
@@ -419,6 +423,14 @@ def sale_create(request):
                         break
 
             if has_error:
+                for inventory, qty in stock_updates:
+                    inventory.quantity_pieces += qty
+                    inventory.save()
+                sale.delete()
+                return redirect('sale_create')
+
+            if created_items == 0:
+                messages.error(request, '⚠️ Please add at least one product to the sale.')
                 sale.delete()
                 return redirect('sale_create')
 
@@ -458,8 +470,12 @@ def sale_return_create(request, sale_id):
         form.fields['sale_item'].queryset = sale.items.select_related('product')
         if form.is_valid():
             sale_return = form.save(commit=False)
-            if sale_return.quantity > sale_return.sale_item.quantity:
-                messages.error(request, 'Return quantity cannot exceed the sold quantity.')
+            already_returned = sale_return.sale_item.returns.aggregate(
+                total=models.Sum('quantity')
+            )['total'] or 0
+            remaining_quantity = sale_return.sale_item.quantity - already_returned
+            if sale_return.quantity > remaining_quantity:
+                messages.error(request, 'Return quantity cannot exceed the remaining sold quantity.')
                 return redirect('sale_return_create', sale_id=sale.id)
 
             sale_return.branch = sale.branch

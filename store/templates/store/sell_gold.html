@@ -1,0 +1,66 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Sell Your Gold{% endblock %}
+
+{% block content %}
+<section class="section-padding">
+    <h1 class="section-title">Turn Your Gold into Capital</h1>
+    <p style="text-align: center; color: var(--text-muted); margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Our experts provide the most competitive market rates for your scrap gold, coins, and jewellery. Submit your details for a digital valuation.
+    </p>
+
+    <div style="max-width: 700px; margin: 0 auto; background: var(--surface-dark); padding: 3rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <div>
+                    <label style="display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase;">Full Name</label>
+                    <input type="text" name="name" required style="width: 100%; background: #111; border: 1px solid var(--glass-border); padding: 1rem; color: #fff; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase;">Phone Number</label>
+                    <input type="text" name="phone" required style="width: 100%; background: #111; border: 1px solid var(--glass-border); padding: 1rem; color: #fff; border-radius: 4px;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase;">Email</label>
+                <input type="email" name="email" required style="width: 100%; background: #111; border: 1px solid var(--glass-border); padding: 1rem; color: #fff; border-radius: 4px;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <div>
+                    <label style="display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase;">Gold Purity (Karat)</label>
+                    <select name="karat" required style="width: 100%; background: #111; border: 1px solid var(--glass-border); padding: 1rem; color: #fff; border-radius: 4px;">
+                        <option value="18">18K</option>
+                        <option value="21">21K</option>
+                        <option value="22">22K</option>
+                        <option value="24">24K</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase;">Estimated Weight (Grams)</label>
+                    <input type="number" step="0.01" name="weight" required style="width: 100%; background: #111; border: 1px solid var(--glass-border); padding: 1rem; color: #fff; border-radius: 4px;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase;">Item Description</label>
+                <input type="text" name="gold_type" placeholder="e.g., Broken necklace, 10 gold coins" required style="width: 100%; background: #111; border: 1px solid var(--glass-border); padding: 1rem; color: #fff; border-radius: 4px;">
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase;">Upload Image (Optional)</label>
+                <input type="file" name="image" style="width: 100%; background: #111; border: 1px solid var(--glass-border); padding: 1rem; color: #fff; border-radius: 4px;">
+            </div>
+
+            <div style="margin-bottom: 2.5rem;">
+                <label style="display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase;">Additional Notes</label>
+                <textarea name="notes" rows="3" style="width: 100%; background: #111; border: 1px solid var(--glass-border); padding: 1rem; color: #fff; border-radius: 4px;"></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%; border: none; cursor: pointer; font-size: 1.1rem; padding: 1.2rem;">Request Valuation</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

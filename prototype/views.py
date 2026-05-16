@@ -8,6 +8,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.contrib.auth import authenticate, login, logout
 from .models import Customer, Expense, GoldPrice, Category, Product, Inventory, Sale, SaleItem, SaleReturn, Purchase, Branch, Supplier
+from store.models import Order, OnlinePurchase
 from .forms import (
     CategoryForm,
     CustomerForm,
@@ -911,11 +912,45 @@ def export_financial_csv(request):
     ])
     return write_csv_response('financial_report.csv', rows)
 
+@admin_required
+def online_order_list(request):
+    orders = Order.objects.order_by('-created_at')
+    status = request.GET.get('status')
+    if status:
+        orders = orders.filter(status=status)
+    return render(request, 'prototype/online_order_list.html', {'orders': orders, 'current_status': status})
+
+@admin_required
+def online_purchase_list(request):
+    requests = OnlinePurchase.objects.order_by('-created_at')
+    status = request.GET.get('status')
+    if status:
+        requests = requests.filter(status=status)
+    return render(request, 'prototype/online_purchase_list.html', {'requests': requests, 'current_status': status})
+
+@admin_required
+def online_purchase_detail(request, pk):
+    purchase_request = get_object_or_404(OnlinePurchase, pk=pk)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'offer':
+            purchase_request.shop_offer_price = request.POST.get('price')
+            purchase_request.status = 'offered'
+            messages.success(request, "Offer sent to customer.")
+        elif action == 'reject':
+            purchase_request.status = 'rejected'
+            messages.success(request, "Request rejected.")
+        elif action == 'complete':
+            purchase_request.status = 'completed'
+            messages.success(request, "Purchase marked as completed.")
+        purchase_request.save()
+        return redirect('online_purchase_list')
+    
+    return render(request, 'prototype/online_purchase_detail.html', {'request': purchase_request})
+
 def get_branch_filter(request):
-    """
-    Admin → no filter (sees all branches)
-    Cashier → filter by their branch
-    """
+    """Helper used in various views to filter by branch based on user profile."""
     if request.user.profile.is_admin():
-        return {}  # no filter
+        branch_id = request.GET.get('branch')
+        return {'branch_id': branch_id} if branch_id else {}
     return {'branch': request.user.profile.branch}

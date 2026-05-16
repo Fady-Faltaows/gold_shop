@@ -1,0 +1,65 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Your Selection{% endblock %}
+
+{% block content %}
+<section class="section-padding">
+    <h1 class="section-title">Your Selection</h1>
+    
+    {% if cart_items %}
+        <div class="cart-container" style="max-width: 1000px; margin: 0 auto;">
+            <div class="cart-table" style="background: var(--surface-dark); border-radius: 12px; border: 1px solid var(--glass-border); overflow: hidden; margin-bottom: 2rem;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--glass-border); background: rgba(255,255,255,0.02);">
+                            <th style="padding: 1.5rem; text-align: left;">Product</th>
+                            <th style="padding: 1.5rem; text-align: center;">Quantity</th>
+                            <th style="padding: 1.5rem; text-align: right;">Subtotal</th>
+                            <th style="padding: 1.5rem;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_items %}
+                            <tr style="border-bottom: 1px solid var(--glass-border);">
+                                <td style="padding: 1.5rem;">
+                                    <div style="display: flex; align-items: center; gap: 1.5rem;">
+                                        {% if item.product.image %}
+                                            <img src="{{ item.product.image.url }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+                                        {% else %}
+                                            <div style="width: 60px; height: 60px; background: #111; border-radius: 4px;"></div>
+                                        {% endif %}
+                                        <div>
+                                            <div style="font-weight: 600;">{{ item.product.name }}</div>
+                                            <div style="font-size: 0.8rem; color: var(--gold-primary);">{{ item.product.karat }}K Gold</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding: 1.5rem; text-align: center;">{{ item.quantity }}</td>
+                                <td style="padding: 1.5rem; text-align: right; font-family: 'Playfair Display', serif; font-size: 1.1rem;">
+                                    £{{ item.subtotal|floatformat:2 }}
+                                </td>
+                                <td style="padding: 1.5rem; text-align: center;">
+                                    <a href="{% url 'store:cart_remove' item.product.id %}" style="color: #ff4444; text-decoration: none; font-size: 0.8rem;">Remove</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 3rem; background: var(--surface-dark); padding: 2rem; border-radius: 12px; border: 1px solid var(--gold-primary);">
+                <div style="text-align: right;">
+                    <div style="color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase;">Grand Total</div>
+                    <div style="font-size: 2.5rem; font-family: 'Playfair Display', serif; color: var(--gold-light);">£{{ grand_total|floatformat:2 }}</div>
+                </div>
+                <a href="{% url 'store:checkout' %}" class="btn-primary" style="padding: 1.5rem 3rem;">Proceed to Checkout</a>
+            </div>
+        </div>
+    {% else %}
+        <div style="background: var(--surface-dark); padding: 5rem 2rem; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
+            <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 1.2rem;">Your luxury selection is currently empty.</p>
+            <a href="{% url 'store:product_list' %}" class="btn-primary">Explore Collection</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

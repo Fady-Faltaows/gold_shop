@@ -1,0 +1,36 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<section class="section-padding">
+    <h1 class="section-title">Finalize Order</h1>
+    
+    <div style="max-width: 600px; margin: 0 auto; background: var(--surface-dark); padding: 3rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+        <form method="post">
+            {% csrf_token %}
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase;">Full Name</label>
+                <input type="text" name="name" required style="width: 100%; background: #111; border: 1px solid var(--glass-border); padding: 1rem; color: #fff; border-radius: 4px;">
+            </div>
+            
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase;">Email Address</label>
+                <input type="email" name="email" required style="width: 100%; background: #111; border: 1px solid var(--glass-border); padding: 1rem; color: #fff; border-radius: 4px;">
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase;">Phone Number</label>
+                <input type="text" name="phone" required style="width: 100%; background: #111; border: 1px solid var(--glass-border); padding: 1rem; color: #fff; border-radius: 4px;">
+            </div>
+
+            <div style="margin-bottom: 2.5rem;">
+                <label style="display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase;">Delivery Address</label>
+                <textarea name="address" required rows="4" style="width: 100%; background: #111; border: 1px solid var(--glass-border); padding: 1rem; color: #fff; border-radius: 4px;"></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%; border: none; cursor: pointer; font-size: 1.1rem; padding: 1.2rem;">Complete Purchase</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

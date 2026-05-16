@@ -57,6 +57,12 @@ urlpatterns = [
     path('reports/sales/export.csv', views.export_sales_csv, name='export_sales_csv'),
     path('reports/inventory/export.csv', views.export_inventory_csv, name='export_inventory_csv'),
     path('reports/financial/export.csv', views.export_financial_csv, name='export_financial_csv'),
+    
+    # digital storefront monitoring
+    path('online-orders/', views.online_order_list, name='online_order_list'),
+    path('online-purchases/', views.online_purchase_list, name='online_purchase_list'),
+    path('online-purchases/<int:pk>/', views.online_purchase_detail, name='online_purchase_detail'),
+
     # ── PWA Mobile Monitor ──
     path('mobile/', include('prototype.urls_mobile')),
 ]

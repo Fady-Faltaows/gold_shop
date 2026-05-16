@@ -6,6 +6,7 @@ Read-only, admin-only views powering the PWA mobile monitor.
 from django.db import models
 from django.shortcuts import render
 from django.utils import timezone
+from datetime import datetime, time
 
 from .decorators import admin_required
 from .models import (
@@ -13,14 +14,22 @@ from .models import (
     Purchase, Expense, SaleReturn,
 )
 
+def get_today_range():
+    """Helper to get start and end of day in the current timezone."""
+    today = timezone.localtime(timezone.now()).date()
+    start = timezone.make_aware(datetime.combine(today, time.min))
+    end = timezone.make_aware(datetime.combine(today, time.max))
+    return start, end, today
 
 @admin_required
 def mobile_dashboard(request):
-    today       = timezone.now().date()
+    start, end, today = get_today_range()
+    
     latest_gold = GoldPrice.objects.order_by('-updated_at').first()
     branches    = Branch.objects.filter(is_active=True)
 
-    today_sales   = Sale.objects.filter(created_at__date=today)
+    # Use range instead of __date to be more robust across different DB engines (MySQL/SQLite)
+    today_sales   = Sale.objects.filter(created_at__range=(start, end))
     today_revenue = sum(s.get_total()        for s in today_sales)
     today_profit  = sum(s.get_total_profit() for s in today_sales)
     today_count   = today_sales.count()
@@ -67,7 +76,6 @@ def mobile_dashboard(request):
     }
     return render(request, 'mobile/dashboard.html', context)
 
-
 @admin_required
 def mobile_inventory(request):
     branch_id = request.GET.get('branch')
@@ -99,12 +107,11 @@ def mobile_inventory(request):
     }
     return render(request, 'mobile/inventory.html', context)
 
-
 @admin_required
 def mobile_sales(request):
     branch_id = request.GET.get('branch')
     branches  = Branch.objects.filter(is_active=True)
-    today     = timezone.now().date()
+    start, end, today = get_today_range()
 
     sales = Sale.objects.select_related(
         'customer', 'branch'
@@ -114,7 +121,7 @@ def mobile_sales(request):
         sales = sales.filter(branch_id=branch_id)
 
     recent_sales  = sales[:50]
-    today_sales   = sales.filter(created_at__date=today)
+    today_sales   = sales.filter(created_at__range=(start, end))
     today_revenue = sum(s.get_total()        for s in today_sales)
     today_profit  = sum(s.get_total_profit() for s in today_sales)
 
@@ -127,7 +134,6 @@ def mobile_sales(request):
         'today_count':     today_sales.count(),
     }
     return render(request, 'mobile/sales.html', context)
-
 
 @admin_required
 def mobile_gold_price(request):
@@ -159,7 +165,6 @@ def mobile_gold_price(request):
     }
     return render(request, 'mobile/gold_price.html', context)
 
-
 @admin_required
 def mobile_reports(request):
     branch_id = request.GET.get('branch')
@@ -167,16 +172,22 @@ def mobile_reports(request):
     date_to   = request.GET.get('date_to')
     branches  = Branch.objects.filter(is_active=True)
 
-    today = timezone.now().date()
+    today = timezone.localtime(timezone.now()).date()
     if not date_from:
         date_from = today.replace(day=1).isoformat()
     if not date_to:
         date_to = today.isoformat()
 
-    sales     = Sale.objects.filter(created_at__date__gte=date_from, created_at__date__lte=date_to)
-    purchases = Purchase.objects.filter(created_at__date__gte=date_from, created_at__date__lte=date_to)
+    # Convert ISO dates to aware datetimes for range queries
+    dt_from = timezone.make_aware(datetime.combine(datetime.fromisoformat(date_from).date(), time.min))
+    dt_to   = timezone.make_aware(datetime.combine(datetime.fromisoformat(date_to).date(), time.max))
+
+    sales     = Sale.objects.filter(created_at__range=(dt_from, dt_to))
+    purchases = Purchase.objects.filter(created_at__range=(dt_from, dt_to))
+    
+    # Expenses use DateField so __gte/__lte is fine, but for consistency:
     expenses  = Expense.objects.filter(paid_at__gte=date_from, paid_at__lte=date_to)
-    returns   = SaleReturn.objects.filter(created_at__date__gte=date_from, created_at__date__lte=date_to)
+    returns   = SaleReturn.objects.filter(created_at__range=(dt_from, dt_to))
 
     if branch_id:
         sales     = sales.filter(branch_id=branch_id)
@@ -197,11 +208,7 @@ def mobile_reports(request):
 
     branch_rows = []
     for branch in branches:
-        b_sales   = Sale.objects.filter(
-            branch=branch,
-            created_at__date__gte=date_from,
-            created_at__date__lte=date_to,
-        )
+        b_sales   = sales.filter(branch=branch)
         b_revenue = sum(s.get_total()        for s in b_sales)
         b_profit  = sum(s.get_total_profit() for s in b_sales)
         branch_rows.append({

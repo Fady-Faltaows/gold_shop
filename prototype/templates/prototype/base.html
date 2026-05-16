@@ -21,6 +21,10 @@
                 <a class="stitch-nav-link" href="{% url 'sale_list' %}" id="nav-sales">🧾 Sales</a>
                 <a class="stitch-nav-link" href="{% url 'customer_list' %}" id="nav-customers">👤 Customers</a>
                 
+                <div style="margin-top: 32px; margin-bottom: 12px; padding: 0 16px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stitch-on-surface-variant); font-weight: 700; opacity: 0.6;">Digital Storefront</div>
+                <a class="stitch-nav-link" href="{% url 'online_order_list' %}" id="nav-online-orders">🌐 Online Orders</a>
+                <a class="stitch-nav-link" href="{% url 'online_purchase_list' %}" id="nav-online-purchases">💰 Buy Requests</a>
+                
                 {% if request.user.is_authenticated and request.user.profile.is_admin %}
                     <div style="margin-top: 32px; margin-bottom: 12px; padding: 0 16px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stitch-on-surface-variant); font-weight: 700; opacity: 0.6;">Inventory Management</div>
                     <a class="stitch-nav-link" href="{% url 'product_list' %}" id="nav-products">💎 Products</a>

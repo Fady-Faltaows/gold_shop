@@ -1,0 +1,68 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<section class="section-padding">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 4rem; align-items: start;">
+        <div class="product-detail-image" style="background: var(--surface-dark); border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border);">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; display: block;">
+            {% else %}
+                <div style="height: 500px; display: flex; align-items: center; justify-content: center; color: #333;">No Image Available</div>
+            {% endif %}
+        </div>
+        
+        <div class="product-detail-info">
+            <div class="product-category" style="margin-bottom: 1rem;">{{ product.category.name }}</div>
+            <h1 style="font-size: 3rem; margin-bottom: 1.5rem;">{{ product.name }}</h1>
+            
+            <div style="margin-bottom: 2rem;">
+                <span style="color: var(--text-muted); font-size: 0.9rem;">Purity:</span>
+                <span style="color: var(--gold-primary); font-weight: 600; margin-left: 0.5rem;">{{ product.karat }}K Gold</span>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <span style="color: var(--text-muted); font-size: 0.9rem;">Weight:</span>
+                <span style="color: var(--text-light); margin-left: 0.5rem;">{{ product.weight_grams }}g</span>
+            </div>
+
+            <div class="detail-price" style="font-size: 2.5rem; color: var(--gold-light); margin-bottom: 1rem;">
+                {% if product.get_selling_price %}
+                    £{{ product.get_selling_price|floatformat:2 }}
+                {% else %}
+                    Price on Request
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom: 2.5rem;">
+                {% if is_in_stock %}
+                    <span style="color: #44ff44; font-size: 0.9rem;">● In Stock ({{ stock_count }} available)</span>
+                {% else %}
+                    <span style="color: #ff4444; font-size: 0.9rem;">○ Currently Out of Stock</span>
+                {% endif %}
+            </div>
+
+            <p style="color: var(--text-muted); margin-bottom: 3rem;">
+                {{ product.notes|default:"This exquisite piece represents the pinnacle of craftsmanship, designed for those who value both beauty and investment-grade quality." }}
+            </p>
+
+            <form action="{% url 'store:cart_add' product.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn-primary" 
+                        {% if not is_in_stock %}disabled style="opacity: 0.5; cursor: not_allowed; background: #333;"{% endif %}
+                        style="width: 100%; border: none; cursor: pointer;">
+                    {% if is_in_stock %}Add to Cart{% else %}Out of Stock{% endif %}
+                </button>
+            </form>
+
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--glass-border); font-size: 0.85rem; color: var(--text-muted);">
+                <p>✓ Insured Shipping</p>
+                <p>✓ Authenticity Certificate Included</p>
+                <p>✓ 14-Day Boutique Exchange Policy</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

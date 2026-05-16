@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('pwa.urls')),        # ← new: serves the PWA manifest
+    path('', include('pwa.urls')),
+    path('store/', include('store.urls')),
     path('', include('prototype.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

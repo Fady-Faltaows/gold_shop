@@ -102,6 +102,13 @@ dismissBtn?.addEventListener('click', () => {
     banner.classList.remove('visible');
     localStorage.setItem('pwa-dismissed', '1');
 });
+
+// Auto-refresh every 30 seconds if the page is visible to keep data fresh
+setInterval(() => {
+    if (document.visibilityState === 'visible') {
+        window.location.reload();
+    }
+}, 30000);
 </script>
 
 {% block scripts %}{% endblock %}

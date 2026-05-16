@@ -1,0 +1,53 @@
+{% extends 'prototype/base.html' %}
+{% block title %}Online Store Orders{% endblock %}
+
+{% block content %}
+<div class="stitch-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="stitch-card-title">🌐 Digital Store Orders</h2>
+        <div class="stitch-filter-bar">
+            <a href="?status=" class="stitch-badge {% if not current_status %}stitch-badge-gold{% else %}stitch-badge-outline{% endif %}">All</a>
+            <a href="?status=pending" class="stitch-badge {% if current_status == 'pending' %}stitch-badge-gold{% else %}stitch-badge-outline{% endif %}">Pending</a>
+            <a href="?status=confirmed" class="stitch-badge {% if current_status == 'confirmed' %}stitch-badge-gold{% else %}stitch-badge-outline{% endif %}">Confirmed</a>
+        </div>
+    </div>
+
+    <table class="stitch-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>#{{ order.id }}</td>
+                <td>
+                    <strong>{{ order.customer_name }}</strong><br>
+                    <small class="text-muted">{{ order.phone }}</small>
+                </td>
+                <td>{{ order.created_at|date:"d M Y, H:i" }}</td>
+                <td style="color: var(--stitch-primary); font-weight: 700;">£{{ order.total_amount|floatformat:2 }}</td>
+                <td>
+                    <span class="stitch-badge {% if order.status == 'delivered' %}stitch-badge-success{% elif order.status == 'pending' %}stitch-badge-outline{% else %}stitch-badge-gold{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    <small>{{ order.address|truncatechars:30 }}</small>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center py-4">No online orders found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

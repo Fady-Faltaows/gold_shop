@@ -1,0 +1,40 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Our Collection{% endblock %}
+
+{% block content %}
+<section class="section-padding">
+    <h1 class="section-title">The Collection</h1>
+    
+    <div class="product-grid">
+        {% for product in products %}
+            <div class="product-card">
+                <div class="product-image">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    {% else %}
+                        <div style="width: 100%; height: 100%; background: #151515; display: flex; align-items: center; justify-content: center; color: #333;">No Image</div>
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <div class="product-category">{{ product.category.name }}</div>
+                    <h3 class="product-name">{{ product.name }}</h3>
+                    <div class="product-price">
+                        {% if product.get_selling_price %}
+                            £{{ product.get_selling_price|floatformat:2 }}
+                        {% else %}
+                            Price on Request
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'store:product_detail' product.id %}" class="btn-primary mt-4" style="padding: 0.5rem 1rem; font-size: 0.8rem; width: 100%; text-align: center;">View Details</a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center" style="grid-column: 1 / -1;">
+                <p>Our vault is currently being replenished. Please check back soon.</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUXE GOLD — {% block title %}{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'store/css/store.css' %}">
+</head>
+<body class="luxury-theme">
+    <nav class="luxury-nav">
+        <div class="nav-container">
+            <a href="{% url 'store:home' %}" class="nav-brand">
+                <span class="brand-accent">LUXE</span> GOLD
+            </a>
+            <div class="nav-links">
+                <a href="{% url 'store:product_list' %}">Collection</a>
+                <a href="{% url 'store:sell_gold' %}">Sell Your Gold</a>
+                <a href="{% url 'store:cart_view' %}" class="cart-link">
+                    Cart <span class="cart-count">{{ cart_count }}</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="luxury-footer">
+        <div class="footer-content">
+            <div class="footer-brand">LUXE GOLD</div>
+            <p>Elegance in every gram.</p>
+            <div class="footer-links">
+                <a href="#">Terms</a>
+                <a href="#">Privacy</a>
+                <a href="{% url 'dashboard' %}">Staff Access</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 LUXE GOLD SHREWSBURY. All Rights Reserved.
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

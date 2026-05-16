@@ -326,3 +326,65 @@ class AuthAndViewTests(GoldShopTestMixin, TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Low Stock')
+
+    def test_report_profit_view(self):
+        self.client.login(username='admin', password='pass12345')
+        # Create a sale
+        sale = Sale.objects.create(
+            gold_price_at_sale=self.gold_price.price_per_gram,
+            branch=self.branch,
+        )
+        SaleItem.objects.create(
+            sale=sale,
+            product=self.product,
+            quantity=1,
+            price_per_piece=Decimal('31000.00'),
+            cost_per_piece=Decimal('26250.00'),
+        )
+        
+        response = self.client.get(reverse('report_profit'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('total_profit', response.context)
+        self.assertEqual(response.context['total_profit'], 4750.0)
+
+    def test_financial_report_view(self):
+        self.client.login(username='admin', password='pass12345')
+        response = self.client.get(reverse('financial_report'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('sales', response.context)
+
+    def test_online_order_and_purchase_monitoring(self):
+        from store.models import Order, OnlinePurchase
+        self.client.login(username='admin', password='pass12345')
+        
+        # Create mock order
+        Order.objects.create(customer_name="Test Online", total_amount=5000)
+        # Create mock purchase request
+        OnlinePurchase.objects.create(
+            customer_name="Seller Test", phone="123", email="s@t.com",
+            gold_type="Scrap", karat=18, estimated_weight=10
+        )
+        
+        response = self.client.get(reverse('online_order_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Test Online")
+        
+        response = self.client.get(reverse('online_purchase_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Seller Test")
+
+    def test_customer_list_search(self):
+        self.client.login(username='admin', password='pass12345')
+        Customer.objects.create(full_name="Unique Name", phone="999888777")
+        
+        # Search by name
+        response = self.client.get(reverse('customer_list'), {'q': 'Unique'})
+        self.assertContains(response, "Unique Name")
+        
+        # Search by phone
+        response = self.client.get(reverse('customer_list'), {'q': '999888'})
+        self.assertContains(response, "Unique Name")
+        
+        # Search non-existent
+        response = self.client.get(reverse('customer_list'), {'q': 'NotFound'})
+        self.assertNotContains(response, "Unique Name")

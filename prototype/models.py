@@ -237,13 +237,15 @@ class SaleItem(models.Model):
         return (self.price_per_piece - self.cost_per_piece) * self.quantity
 
     def save(self, *args, **kwargs):
-        if self.product:
+        if self.product and (not self.cost_per_piece or not self.price_per_piece):
             latest_gold = GoldPrice.objects.order_by('-updated_at').first()
             if latest_gold:
                 gold_price           = latest_gold.price_per_gram
                 purity               = self.product.get_purity()
-                self.cost_per_piece  = gold_price * purity * self.product.weight_grams
-                self.price_per_piece = self.cost_per_piece + self.product.workmanship_fee
+                if not self.cost_per_piece:
+                    self.cost_per_piece  = gold_price * purity * self.product.weight_grams
+                if not self.price_per_piece:
+                    self.price_per_piece = self.cost_per_piece + self.product.workmanship_fee
         super().save(*args, **kwargs)
 
     def __str__(self):

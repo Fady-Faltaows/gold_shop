@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.db.models import Sum
 from prototype.models import Product, Category, GoldPrice, Inventory, Sale, SaleItem, Branch
-from .models import Order, OrderItem
+from .models import Order, OrderItem, OnlinePurchase
 from decimal import Decimal
 
 def get_available_products():

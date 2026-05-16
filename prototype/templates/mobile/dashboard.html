@@ -1,0 +1,144 @@
+{% extends "mobile/base_mobile.html" %}
+{% block title %}Overview — Gold Monitor{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+
+{% if latest_gold %}
+<div class="m-gold-hero">
+    <div class="m-gold-hero__label">Current Gold Price</div>
+    <div class="m-gold-hero__price">
+        <span>EGP</span> {{ latest_gold.price_per_gram|floatformat:2 }}
+        <span style="font-size:0.9rem; color:var(--text-muted)">/g</span>
+    </div>
+    <div class="m-gold-hero__meta">Updated {{ latest_gold.updated_at|date:"d M Y, H:i" }}</div>
+</div>
+{% endif %}
+
+<p class="m-section-title">Today · {{ today|date:"d M Y" }}</p>
+
+<div class="m-stats m-stats--3">
+    <div class="m-stat">
+        <div class="m-stat__label">Revenue</div>
+        <div class="m-stat__value gold" style="font-size:1.25rem">{{ today_revenue|floatformat:0 }}</div>
+        <div class="m-stat__sub">EGP</div>
+    </div>
+    <div class="m-stat">
+        <div class="m-stat__label">Profit</div>
+        <div class="m-stat__value green" style="font-size:1.25rem">{{ today_profit|floatformat:0 }}</div>
+        <div class="m-stat__sub">EGP</div>
+    </div>
+    <div class="m-stat">
+        <div class="m-stat__label">Sales</div>
+        <div class="m-stat__value">{{ today_count }}</div>
+        <div class="m-stat__sub">txns</div>
+    </div>
+</div>
+
+{% if out_of_stock_count or low_stock_count %}
+<div class="m-stats m-stats--2">
+    {% if out_of_stock_count %}
+    <div class="m-stat">
+        <div class="m-stat__label">Out of Stock</div>
+        <div class="m-stat__value red">{{ out_of_stock_count }}</div>
+        <div class="m-stat__sub">items</div>
+    </div>
+    {% endif %}
+    {% if low_stock_count %}
+    <div class="m-stat">
+        <div class="m-stat__label">Low Stock</div>
+        <div class="m-stat__value amber">{{ low_stock_count }}</div>
+        <div class="m-stat__sub">items</div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if gold_labels %}
+<div class="m-sparkline-wrap">
+    <p class="m-section-title" style="margin-bottom:10px">Gold Price Trend</p>
+    <canvas id="sparkChart" height="80"></canvas>
+</div>
+{% endif %}
+
+{% if branch_cards %}
+<p class="m-section-title mt-14">Branches Today</p>
+{% for b in branch_cards %}
+<div class="m-card">
+    <div class="m-card__header">
+        <div>
+            <div class="m-card__title">{{ b.branch.name }}</div>
+            <div class="m-card__sub">{{ b.count }} sale{{ b.count|pluralize }}</div>
+        </div>
+        {% if b.low > 0 %}
+        <span class="m-pill m-pill--low">⚠ {{ b.low }} low</span>
+        {% else %}
+        <span class="m-pill m-pill--ok">✓ Stock OK</span>
+        {% endif %}
+    </div>
+    <div class="m-card__rows">
+        <div class="m-card__row">
+            <span class="m-card__row-label">Revenue</span>
+            <span class="m-card__row-value gold">EGP {{ b.revenue|floatformat:2 }}</span>
+        </div>
+        <div class="m-card__row">
+            <span class="m-card__row-label">Profit</span>
+            <span class="m-card__row-value green">EGP {{ b.profit|floatformat:2 }}</span>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<div class="m-divider"></div>
+<p class="m-section-title">Quick Access</p>
+<div class="m-stats m-stats--2">
+    <a href="{% url 'mobile:inventory' %}" style="text-decoration:none">
+        <div class="m-stat" style="cursor:pointer">
+            <div class="m-stat__label">Stock Report</div>
+            <div class="m-stat__value" style="font-size:1.4rem">◫</div>
+        </div>
+    </a>
+    <a href="{% url 'mobile:reports' %}" style="text-decoration:none">
+        <div class="m-stat" style="cursor:pointer">
+            <div class="m-stat__label">Financials</div>
+            <div class="m-stat__value" style="font-size:1.4rem">≡</div>
+        </div>
+    </a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{% if gold_labels %}
+<script>
+const ctx = document.getElementById('sparkChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ gold_labels|safe }},
+        datasets: [{
+            data: {{ gold_values|safe }},
+            borderColor: '#C9A84C',
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0.4,
+            fill: true,
+            backgroundColor: (ctx) => {
+                const g = ctx.chart.ctx.createLinearGradient(0,0,0,80);
+                g.addColorStop(0, 'rgba(201,168,76,0.25)');
+                g.addColorStop(1, 'rgba(201,168,76,0)');
+                return g;
+            },
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: { x: { display: false }, y: { display: false } },
+        animation: { duration: 600 },
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

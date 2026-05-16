@@ -1,0 +1,70 @@
+{% extends "mobile/base_mobile.html" %}
+{% block title %}Sales — Gold Monitor{% endblock %}
+{% block nav_sales %}active{% endblock %}
+
+{% block content %}
+
+<div class="m-stats m-stats--3" style="margin-bottom:14px">
+    <div class="m-stat">
+        <div class="m-stat__label">Txns</div>
+        <div class="m-stat__value">{{ today_count }}</div>
+        <div class="m-stat__sub">today</div>
+    </div>
+    <div class="m-stat">
+        <div class="m-stat__label">Revenue</div>
+        <div class="m-stat__value gold" style="font-size:1.2rem">{{ today_revenue|floatformat:0 }}</div>
+        <div class="m-stat__sub">EGP</div>
+    </div>
+    <div class="m-stat">
+        <div class="m-stat__label">Profit</div>
+        <div class="m-stat__value green" style="font-size:1.2rem">{{ today_profit|floatformat:0 }}</div>
+        <div class="m-stat__sub">EGP</div>
+    </div>
+</div>
+
+<div class="m-filter">
+    <a href="{% url 'mobile:sales' %}"
+       class="m-filter__btn {% if not selected_branch %}active{% endif %}">All</a>
+    {% for branch in branches %}
+    <a href="{% url 'mobile:sales' %}?branch={{ branch.id }}"
+       class="m-filter__btn {% if selected_branch == branch.id|stringformat:'s' %}active{% endif %}">
+        {{ branch.name }}
+    </a>
+    {% endfor %}
+</div>
+
+<p class="m-section-title">Recent Sales <span class="text-muted text-sm">(last 50)</span></p>
+
+{% if sales %}
+<div class="m-list">
+    {% for sale in sales %}
+    <div class="m-list-item">
+        <div class="m-list-item__left">
+            <div class="m-list-item__title">
+                {% if sale.customer %}{{ sale.customer.full_name }}
+                {% elif sale.customer_name %}{{ sale.customer_name }}
+                {% else %}Walk-in Customer{% endif %}
+            </div>
+            <div class="m-list-item__meta">
+                #{{ sale.id }} · {{ sale.branch.name }} · {{ sale.created_at|date:"d M, H:i" }}
+            </div>
+        </div>
+        <div class="m-list-item__right">
+            <div class="m-list-item__amount">EGP {{ sale.get_total|floatformat:2 }}</div>
+            <div class="m-list-item__sub" style="color:var(--green)">+{{ sale.get_total_profit|floatformat:0 }} profit</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="m-total-row mt-8">
+    <span class="m-total-row__label">Today's Revenue</span>
+    <span class="m-total-row__value">EGP {{ today_revenue|floatformat:2 }}</span>
+</div>
+{% else %}
+<div class="m-empty">
+    <div class="m-empty__icon">↗</div>
+    No sales found.
+</div>
+{% endif %}
+
+{% endblock %}

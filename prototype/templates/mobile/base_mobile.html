@@ -1,0 +1,109 @@
+{% load static pwa %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#B8860B">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gold Monitor">
+    <title>{% block title %}Gold Shop Monitor{% endblock %}</title>
+    {% progressive_web_app_meta %}
+    <link rel="stylesheet" href="{% static 'css/mobile.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- Install Banner -->
+<div id="m-install-banner" role="banner">
+    <p>Add <strong>Gold Monitor</strong> to your home screen for instant access.</p>
+    <div class="m-install-banner__btns">
+        <button class="m-btn-install" id="m-install-btn">Install</button>
+        <button class="m-btn-dismiss" id="m-dismiss-btn">✕</button>
+    </div>
+</div>
+
+<!-- Top Header -->
+<header class="m-header">
+    <div class="m-header__wordmark">
+        Gold Monitor
+        <span>Admin Dashboard</span>
+    </div>
+    <div class="m-header__right">
+        <span class="m-badge">
+            <span class="m-live-dot"></span>Live
+        </span>
+    </div>
+</header>
+
+<!-- Page Content -->
+<main class="m-page">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- Bottom Navigation -->
+<nav class="m-nav" aria-label="Main navigation">
+    <div class="m-nav__items">
+        <a href="{% url 'mobile:dashboard' %}"  class="m-nav__item {% block nav_dashboard %}{% endblock %}">
+            <span class="m-nav__icon">⌂</span>
+            <span class="m-nav__label">Overview</span>
+        </a>
+        <a href="{% url 'mobile:sales' %}"      class="m-nav__item {% block nav_sales %}{% endblock %}">
+            <span class="m-nav__icon">↗</span>
+            <span class="m-nav__label">Sales</span>
+        </a>
+        <a href="{% url 'mobile:inventory' %}"  class="m-nav__item {% block nav_inventory %}{% endblock %}">
+            <span class="m-nav__icon">◫</span>
+            <span class="m-nav__label">Stock</span>
+        </a>
+        <a href="{% url 'mobile:gold_price' %}" class="m-nav__item {% block nav_gold %}{% endblock %}">
+            <span class="m-nav__icon">◈</span>
+            <span class="m-nav__label">Gold</span>
+        </a>
+        <a href="{% url 'mobile:reports' %}"    class="m-nav__item {% block nav_reports %}{% endblock %}">
+            <span class="m-nav__icon">≡</span>
+            <span class="m-nav__label">Reports</span>
+        </a>
+    </div>
+</nav>
+
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/sw.js')
+            .catch(err => console.warn('SW registration failed:', err));
+    });
+}
+
+let deferredPrompt;
+const banner     = document.getElementById('m-install-banner');
+const installBtn = document.getElementById('m-install-btn');
+const dismissBtn = document.getElementById('m-dismiss-btn');
+
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!localStorage.getItem('pwa-dismissed')) {
+        banner.classList.add('visible');
+    }
+});
+
+installBtn?.addEventListener('click', async () => {
+    banner.classList.remove('visible');
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+    }
+});
+
+dismissBtn?.addEventListener('click', () => {
+    banner.classList.remove('visible');
+    localStorage.setItem('pwa-dismissed', '1');
+});
+</script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

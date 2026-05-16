@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-m!+)$s6j@vbdj@3^4y^51pkiz-g-(jwf9p6v#gld+qwrh93qwe
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1','192.168.1.2']
 
 
 # Application definition
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'pwa',
     'prototype',
 ]
 
@@ -131,7 +132,32 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+# ─────────────────────────────────────────────
+# PWA CONFIGURATION
+# ─────────────────────────────────────────────
+PWA_APP_NAME = 'Gold Shop Monitor'
+PWA_APP_DESCRIPTION = 'Admin monitoring dashboard for Gold Shop branches'
+PWA_APP_THEME_COLOR = '#B8860B'
+PWA_APP_BACKGROUND_COLOR = '#0F0F0F'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/mobile/'
+PWA_APP_ORIENTATION = 'portrait'
+PWA_APP_START_URL = '/mobile/'
+PWA_APP_STATUS_BAR_COLOR = 'default'
+PWA_APP_ICONS = [
+    {'src': '/static/icons/icon-192.png', 'sizes': '192x192'},
+    {'src': '/static/icons/icon-512.png', 'sizes': '512x512'},
+]
+PWA_APP_ICONS_APPLE = [
+    {'src': '/static/icons/icon-192.png', 'sizes': '192x192'},
+]
+PWA_APP_SPLASH_SCREEN = []
+PWA_APP_DIR = 'ltr'
+PWA_APP_LANG = 'en-US'
+PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static', 'sw.js')

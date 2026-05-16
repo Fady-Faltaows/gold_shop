@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 urlpatterns = [
@@ -57,4 +57,6 @@ urlpatterns = [
     path('reports/sales/export.csv', views.export_sales_csv, name='export_sales_csv'),
     path('reports/inventory/export.csv', views.export_inventory_csv, name='export_inventory_csv'),
     path('reports/financial/export.csv', views.export_financial_csv, name='export_financial_csv'),
+    # ── PWA Mobile Monitor ──
+    path('mobile/', include('prototype.urls_mobile')),
 ]

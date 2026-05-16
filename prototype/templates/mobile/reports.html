@@ -1,0 +1,119 @@
+{% extends "mobile/base_mobile.html" %}
+{% block title %}Reports — Gold Monitor{% endblock %}
+{% block nav_reports %}active{% endblock %}
+
+{% block content %}
+
+<form method="get" class="m-date-form">
+    <div class="m-date-form__group">
+        <label>From</label>
+        <input type="date" name="date_from" value="{{ date_from }}">
+    </div>
+    <div class="m-date-form__group">
+        <label>To</label>
+        <input type="date" name="date_to" value="{{ date_to }}">
+    </div>
+    {% if selected_branch %}<input type="hidden" name="branch" value="{{ selected_branch }}">{% endif %}
+    <button type="submit">Apply</button>
+</form>
+
+<div class="m-filter">
+    <a href="{% url 'mobile:reports' %}?date_from={{ date_from }}&date_to={{ date_to }}"
+       class="m-filter__btn {% if not selected_branch %}active{% endif %}">All</a>
+    {% for branch in branches %}
+    <a href="{% url 'mobile:reports' %}?branch={{ branch.id }}&date_from={{ date_from }}&date_to={{ date_to }}"
+       class="m-filter__btn {% if selected_branch == branch.id|stringformat:'s' %}active{% endif %}">
+        {{ branch.name }}
+    </a>
+    {% endfor %}
+</div>
+
+<p class="m-section-title">Cash Flow</p>
+
+<div class="m-stats m-stats--2" style="margin-bottom:10px">
+    <div class="m-stat">
+        <div class="m-stat__label">Cash In</div>
+        <div class="m-stat__value green" style="font-size:1.2rem">{{ cash_in|floatformat:0 }}</div>
+        <div class="m-stat__sub">EGP revenue</div>
+    </div>
+    <div class="m-stat">
+        <div class="m-stat__label">Cash Out</div>
+        <div class="m-stat__value red" style="font-size:1.2rem">{{ cash_out|floatformat:0 }}</div>
+        <div class="m-stat__sub">EGP outflow</div>
+    </div>
+</div>
+
+<div class="m-card" style="margin-bottom:14px">
+    <div class="m-card__rows">
+        <div class="m-card__row">
+            <span class="m-card__row-label">Purchases</span>
+            <span class="m-card__row-value red">− EGP {{ purchase_outflow|floatformat:2 }}</span>
+        </div>
+        <div class="m-card__row">
+            <span class="m-card__row-label">Expenses</span>
+            <span class="m-card__row-value red">− EGP {{ expense_outflow|floatformat:2 }}</span>
+        </div>
+        <div class="m-card__row">
+            <span class="m-card__row-label">Refunds</span>
+            <span class="m-card__row-value red">− EGP {{ refund_outflow|floatformat:2 }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="m-total-row mb-14">
+    <span class="m-total-row__label">Net Cash Flow</span>
+    <span class="m-total-row__value"
+          style="color: {% if net_flow >= 0 %}var(--green){% else %}var(--red){% endif %}">
+        {% if net_flow >= 0 %}+{% endif %}EGP {{ net_flow|floatformat:2 }}
+    </span>
+</div>
+
+<p class="m-section-title">Profit</p>
+
+<div class="m-stats m-stats--2" style="margin-bottom:10px">
+    <div class="m-stat">
+        <div class="m-stat__label">Gross Profit</div>
+        <div class="m-stat__value gold" style="font-size:1.2rem">{{ gross_profit|floatformat:0 }}</div>
+        <div class="m-stat__sub">EGP</div>
+    </div>
+    <div class="m-stat">
+        <div class="m-stat__label">Net Profit</div>
+        <div class="m-stat__value {% if net_profit >= 0 %}green{% else %}red{% endif %}" style="font-size:1.2rem">
+            {{ net_profit|floatformat:0 }}
+        </div>
+        <div class="m-stat__sub">EGP · {{ sale_count }} sales</div>
+    </div>
+</div>
+
+{% if branch_rows %}
+<p class="m-section-title mt-14">Branch Breakdown</p>
+{% for row in branch_rows %}
+{% if row.count > 0 %}
+<div class="m-card">
+    <div class="m-card__header">
+        <div>
+            <div class="m-card__title">{{ row.branch.name }}</div>
+            <div class="m-card__sub">{{ row.count }} sale{{ row.count|pluralize }}</div>
+        </div>
+    </div>
+    <div class="m-card__rows">
+        <div class="m-card__row">
+            <span class="m-card__row-label">Revenue</span>
+            <span class="m-card__row-value gold">EGP {{ row.revenue|floatformat:2 }}</span>
+        </div>
+        <div class="m-card__row">
+            <span class="m-card__row-label">Profit</span>
+            <span class="m-card__row-value green">EGP {{ row.profit|floatformat:2 }}</span>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endif %}
+
+<div class="m-total-row mt-8">
+    <span class="m-total-row__label">Total Revenue</span>
+    <span class="m-total-row__value">EGP {{ total_revenue|floatformat:2 }}</span>
+</div>
+
+{% endblock %}

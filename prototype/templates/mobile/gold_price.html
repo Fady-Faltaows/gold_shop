@@ -1,0 +1,119 @@
+{% extends "mobile/base_mobile.html" %}
+{% block title %}Gold Price — Gold Monitor{% endblock %}
+{% block nav_gold %}active{% endblock %}
+
+{% block content %}
+
+{% if latest %}
+<div class="m-gold-hero">
+    <div class="m-gold-hero__label">Live Gold Price</div>
+    <div class="m-gold-hero__price">
+        <span>EGP</span> {{ latest.price_per_gram|floatformat:2 }}
+        <span style="font-size:0.9rem; color:var(--text-muted)">/g</span>
+    </div>
+    <div class="m-gold-hero__meta">{{ latest.updated_at|date:"d M Y · H:i" }}</div>
+    {% if change_pct is not None %}
+    <div class="m-gold-hero__change {% if change_pct > 0 %}up{% elif change_pct < 0 %}down{% else %}flat{% endif %}">
+        {% if change_pct > 0 %}▲{% elif change_pct < 0 %}▼{% else %}—{% endif %}
+        {{ change_pct|floatformat:2 }}% vs previous
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="m-stats m-stats--2" style="margin-bottom:14px">
+    <div class="m-stat">
+        <div class="m-stat__label">Highest (30)</div>
+        <div class="m-stat__value gold" style="font-size:1.2rem">
+            {% if highest %}{{ highest.price_per_gram|floatformat:2 }}{% else %}—{% endif %}
+        </div>
+        <div class="m-stat__sub">EGP/g</div>
+    </div>
+    <div class="m-stat">
+        <div class="m-stat__label">Lowest (30)</div>
+        <div class="m-stat__value" style="font-size:1.2rem">
+            {% if lowest %}{{ lowest.price_per_gram|floatformat:2 }}{% else %}—{% endif %}
+        </div>
+        <div class="m-stat__sub">EGP/g</div>
+    </div>
+</div>
+
+{% if chart_labels %}
+<div class="m-sparkline-wrap" style="margin-bottom:14px">
+    <p class="m-section-title" style="margin-bottom:10px">Price History (last 30 entries)</p>
+    <canvas id="goldChart" height="120"></canvas>
+</div>
+{% endif %}
+
+<p class="m-section-title">Price Log</p>
+
+{% if gold_prices %}
+<div class="m-list">
+    {% for gp in gold_prices %}
+    <div class="m-list-item">
+        <div class="m-list-item__left">
+            <div class="m-list-item__title">EGP {{ gp.price_per_gram|floatformat:2 }} <span class="text-muted text-sm">/g</span></div>
+            <div class="m-list-item__meta">{{ gp.updated_at|date:"d M Y · H:i" }}</div>
+        </div>
+        <div class="m-list-item__right">
+            {% if forloop.first %}<span class="m-pill m-pill--gold">Current</span>{% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="m-empty">
+    <div class="m-empty__icon">◈</div>
+    No gold price history available.
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+{% if chart_labels %}
+<script>
+const ctx = document.getElementById('goldChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [{
+            data: {{ chart_values|safe }},
+            borderColor: '#C9A84C',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: '#C9A84C',
+            tension: 0.35,
+            fill: true,
+            backgroundColor: (ctx) => {
+                const g = ctx.chart.ctx.createLinearGradient(0,0,0,120);
+                g.addColorStop(0, 'rgba(201,168,76,0.2)');
+                g.addColorStop(1, 'rgba(201,168,76,0)');
+                return g;
+            },
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1C1C21',
+                titleColor: '#C9A84C',
+                bodyColor: '#F0EDE8',
+                borderColor: '#2A2A32',
+                borderWidth: 1,
+                callbacks: { label: ctx => `EGP ${ctx.parsed.y.toFixed(2)}/g` }
+            }
+        },
+        scales: {
+            x: { ticks: { color: '#4A4856', font: { size: 10 }, maxRotation: 0 }, grid: { color: '#1C1C21' } },
+            y: { ticks: { color: '#7A7880', font: { size: 10 } }, grid: { color: '#1C1C21' } },
+        },
+        animation: { duration: 500 },
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

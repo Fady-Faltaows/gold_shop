@@ -1,0 +1,96 @@
+{% extends "mobile/base_mobile.html" %}
+{% block title %}Stock — Gold Monitor{% endblock %}
+{% block nav_inventory %}active{% endblock %}
+
+{% block content %}
+
+<div class="m-stats m-stats--3" style="margin-bottom:14px">
+    <div class="m-stat">
+        <div class="m-stat__label">Total</div>
+        <div class="m-stat__value">{{ total }}</div>
+        <div class="m-stat__sub">items</div>
+    </div>
+    <div class="m-stat">
+        <div class="m-stat__label">Low</div>
+        <div class="m-stat__value amber">{{ low_stock|length }}</div>
+        <div class="m-stat__sub">items</div>
+    </div>
+    <div class="m-stat">
+        <div class="m-stat__label">Empty</div>
+        <div class="m-stat__value red">{{ out_of_stock|length }}</div>
+        <div class="m-stat__sub">items</div>
+    </div>
+</div>
+
+<div class="m-filter">
+    <a href="{% url 'mobile:inventory' %}"
+       class="m-filter__btn {% if not selected_branch %}active{% endif %}">All Branches</a>
+    {% for branch in branches %}
+    <a href="{% url 'mobile:inventory' %}?branch={{ branch.id }}"
+       class="m-filter__btn {% if selected_branch == branch.id|stringformat:'s' %}active{% endif %}">
+        {{ branch.name }}
+    </a>
+    {% endfor %}
+</div>
+
+{% if out_of_stock %}
+<p class="m-section-title"><span style="color:var(--red)">● </span>Out of Stock</p>
+<div class="m-list mb-14">
+    {% for item in out_of_stock %}
+    <div class="m-list-item">
+        <div class="m-list-item__left">
+            <div class="m-list-item__title">{{ item.product.name }}</div>
+            <div class="m-list-item__meta">{{ item.branch.name }} · {{ item.product.karat }}K · {{ item.product.weight_grams }}g</div>
+        </div>
+        <div class="m-list-item__right">
+            <span class="m-pill m-pill--out">Empty</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if low_stock %}
+<p class="m-section-title"><span style="color:var(--amber)">● </span>Low Stock</p>
+<div class="m-list mb-14">
+    {% for item in low_stock %}
+    <div class="m-list-item">
+        <div class="m-list-item__left">
+            <div class="m-list-item__title">{{ item.product.name }}</div>
+            <div class="m-list-item__meta">{{ item.branch.name }} · {{ item.product.karat }}K</div>
+        </div>
+        <div class="m-list-item__right">
+            <div class="m-list-item__amount" style="color:var(--amber)">{{ item.quantity_pieces }}</div>
+            <div class="m-list-item__sub">/ {{ item.product.low_stock_threshold }} min</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if in_stock %}
+<p class="m-section-title"><span style="color:var(--green)">● </span>In Stock</p>
+<div class="m-list">
+    {% for item in in_stock %}
+    <div class="m-list-item">
+        <div class="m-list-item__left">
+            <div class="m-list-item__title">{{ item.product.name }}</div>
+            <div class="m-list-item__meta">{{ item.branch.name }} · {{ item.product.category.name }} · {{ item.product.karat }}K</div>
+        </div>
+        <div class="m-list-item__right">
+            <div class="m-list-item__amount">{{ item.quantity_pieces }}</div>
+            <div class="m-list-item__sub">pcs</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if not out_of_stock and not low_stock and not in_stock %}
+<div class="m-empty">
+    <div class="m-empty__icon">◫</div>
+    No inventory records found.
+</div>
+{% endif %}
+
+{% endblock %}

@@ -667,6 +667,8 @@ def financial_report(request):
         'cash_out': cash_out,
         'net_cash_flow': cash_in - cash_out,
         'net_profit': gross_profit - expense_outflow - refund_outflow,
+        'sales': sales[:25],
+        'purchases': purchases[:25],
         'expenses': expenses[:25],
         'returns': returns[:25],
     })

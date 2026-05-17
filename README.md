@@ -158,5 +158,4 @@ python manage.py test
 4. Push to the branch (`git push origin feature/NewFeature`).
 5. Open a Pull Request.
 
-## License
-*Placeholder: All rights reserved.* (Replace with your specific license, e.g., MIT, GPL).
+
